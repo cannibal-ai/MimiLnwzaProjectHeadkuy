@@ -1,0 +1,42 @@
+<resources>
+    <string name="app_name">Nu &amp; Su</string>
+    <string name="app_name1">NU &amp;SU</string>
+    <string name="nu_su"><![CDATA[NU & SU]]></string>
+    <string name="guay_jub">Guay Jub</string>
+    <string name="ยอดรวม">ยอดรวมราคาวัตถุดิบ</string>
+    <string name="_10_000">10,000 บาท</string>
+    <string name="จำนวนวัตถุดิบ">วัตถุดิบคงเหลือ</string>
+    <string name="หมด">วัตถุดิบหมด</string>
+    <string name="น้อย">วัตถุดิบเหลือน้อย</string>
+    <string name="title_home">หน้าหลัก</string>
+    <string name="title_dashboard">วัตถุดิบ</string>
+    <string name="title_notifications">ยอด</string>
+    <string name="ค้นหา">ค้นหา</string>
+    <string name="logo">logo</string>
+    <string name="ผัก">ผักสด</string>
+    <string name="รถเครื่อง">เครื่องเคียง</string>
+    <string name="เนื้อคน">เนื้อสด</string>
+    <string name="product">ชื่อวัตถุดิบ</string>
+    <string name="product_description">จำนวนคงเหลือ</string>
+    <string name="price">Price</string>
+    <string name="raionoen">เหลือน้อย</string>
+    <string name="noen">น้อย</string>
+    <string name="radiomod">หมด</string>
+    <string name="watudip">วัตถุดิบในคลัง</string>
+    <string name="_0">0</string>
+    <string name="เพิ่มวัตถุดิบ">เพิ่มรายการวัตถุดิบ</string>
+    <string name="_10_000_00">10,000.00 บาท</string>
+    <string name="นนี้">ยอดรวมราคาวัตถุดิบวันนี้</string>
+    <string name="_8_000_00">8,000.00 บาท</string>
+    <string name="วันที่แล้ว">ยอดรวมราคาวัตถุดิบวันที่แล้ว</string>
+    <string name="เมื่อวาน">ราคาที่บวกเพิ่มจากเมื่อวาน</string>
+    <string name="_2_000_00">2,000.00 บาท</string>
+    <string name="_13_2025">📅 วันที่ 13 ก.ค. 2025</string>
+    <string name="ยอดรวมราคาวัตถุดิบ">ยอดรวมราคาวัตถุดิบ</string>
+    <string name="_10">10</string>
+    <string name="edit">แก้ไข้</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+
+</resources>
