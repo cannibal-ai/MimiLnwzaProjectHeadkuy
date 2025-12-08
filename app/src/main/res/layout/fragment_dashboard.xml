@@ -4,11 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFF8EA"
+    android:background="@color/white"
     tools:context=".ui.dashboard.DashboardFragment"
     tools:layout_editor_absoluteX="8dp"
     tools:layout_editor_absoluteY="0dp">
-
 
     <LinearLayout
         android:id="@+id/dashtitle"

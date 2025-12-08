@@ -15,66 +15,98 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         tools:ignore="MissingConstraints">
 
-        <ImageView
-            android:id="@+id/ivProductImage"
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="200dp"
-            android:layout_marginBottom="10dp"
-            android:scaleType="centerCrop"
-            android:background="#E0E0E0"
-            android:contentDescription="Product Image" />
+            android:layout_marginBottom="10dp">
+
+            <ImageView
+                android:id="@+id/ivProductImage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#E0E0E0"
+                android:contentDescription="Product Image"
+                android:scaleType="centerCrop" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/camera"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/baseline_camera" />
+
+                <TextView
+                    android:id="@+id/tvAddImageText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:text="เพิ่มรูป"
+                    android:textColor="#000000"
+                    android:textSize="20sp" />
+
+            </LinearLayout>
+
+        </FrameLayout>
 
         <EditText
             android:id="@+id/etProductName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:hint="ชื่อ"
             android:textColor="@color/black"
-            android:textColorHint="#A8A8A8"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:textColorHint="#000000" />
 
         <EditText
             android:id="@+id/etPrice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:hint="ราคา"
             android:inputType="number"
             android:textColor="@color/black"
-            android:textColorHint="#A8A8A8"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:textColorHint="#000000" />
 
         <EditText
             android:id="@+id/etType"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:hint="ประเภท"
             android:textColor="@color/black"
-            android:textColorHint="#A8A8A8"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:textColorHint="#000000" />
 
         <EditText
             android:id="@+id/etMany"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:hint="จำนวน"
             android:inputType="number"
             android:textColor="@color/black"
-            android:textColorHint="#A8A8A8"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:textColorHint="#000000" />
 
         <EditText
             android:id="@+id/etDescription"
-            android:textColor="@color/black"
-            android:textColorHint="#A8A8A8"
-            android:hint="รายละเอียด"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:hint="รายละเอียด"
+            android:textColor="@color/black"
+            android:textColorHint="#000000" />
 
         <Button
             android:id="@+id/btnAdd"
 
-            android:backgroundTint="#366B50"
-            android:text="บันทึกรายการวัตถุดิบ"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:backgroundTint="#366B50"
+            android:text="บันทึกรายการวัตถุดิบ" />
     </LinearLayout>
 
 
