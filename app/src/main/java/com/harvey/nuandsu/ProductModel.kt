@@ -10,5 +10,6 @@ data class Product(
     val image: Int,
     val typ: String,
     val pc : Int,
-    val des : String
+    val des : String,
+    val date : String
 ) : Serializable

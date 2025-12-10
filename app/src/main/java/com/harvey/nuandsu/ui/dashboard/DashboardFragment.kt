@@ -6,6 +6,9 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.Spinner
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
@@ -20,23 +23,90 @@ import com.harvey.nuandsu.ui.editproduct.EditDialogFragment
 
 class DashboardFragment : Fragment() {
 
+    private lateinit var fullList: List<Product>
+    private lateinit var adapter: ProductAdapter
+
   private var _binding: FragmentDashboardBinding? = null
   private val binding get() = _binding!!
 
   private val productList = mutableListOf(
-      Product("เส้นใหญ่", 10, null, R.drawable.o,"เครื่องเคียง",20,"เส้นใหญ่ไม่ใช่เส้นเล็ก"),
-      Product("ผักกาด", 5, "น้อย", R.drawable.images,"ผัก",10,"ผักกากมันใส่ในก๋วยจั๊บด้วยหรอวะ"),
-      Product("หมูกรอบ", 20, "หมด", R.drawable.mugrob,"เนื้อสัตว์",200,"หมูกรอบมีมี่ชอบ"),
-      Product("น้ำตาล", 10, "หมด", R.drawable.num,"เครื่องเคียง",5,"น้ำตาลหวานร้อย"),
-      Product("น้ำปลา", 5, "น้อย", R.drawable.numpra,"เครื่องเคียง",20,"น้ำตาลเค็มนำ"),
-      Product("พริกป่น", 20, null, R.drawable.prik,"เครื่องเคียง",20,"เผ็ดจนแสบตูด"),
-      Product("ก๋วยจั๊บ", 20, null, R.drawable.mama,"เครื่องเคียง",20,"ก๋วยจั๊บเขม"),
-      Product("ตับ", 20, null, R.drawable.tub,"เนื้อสัตว์",20,"ตับคน")
+      Product("เส้นใหญ่", 10, null, R.drawable.o,"เครื่องเคียง",20,"เส้นใหญ่ไม่ใช่เส้นเล็ก","2025-12-10"),
+      Product("ผักกาด", 5, "น้อย", R.drawable.images,"ผัก",10,"ผักกากมันใส่ในก๋วยจั๊บด้วยหรอวะ","2025-12-10"),
+      Product("หมูกรอบ", 20, "หมด", R.drawable.mugrob,"เนื้อสัตว์",200,"หมูกรอบมีมี่ชอบ","2025-12-10"),
+      Product("น้ำตาล", 10, "หมด", R.drawable.num,"เครื่องเคียง",5,"น้ำตาลหวานร้อย","2025-12-10"),
+      Product("น้ำปลา", 5, "น้อย", R.drawable.numpra,"เครื่องเคียง",20,"น้ำตาลเค็มนำ","2025-12-10"),
+      Product("พริกป่น", 20, null, R.drawable.prik,"เครื่องเคียง",20,"เผ็ดจนแสบตูด","2025-12-10"),
+      Product("ก๋วยจั๊บ", 20, null, R.drawable.mama,"เครื่องเคียง",20,"ก๋วยจั๊บเขม","2025-12-10"),
+      Product("ตับ", 20, null, R.drawable.tub,"เนื้อสัตว์",20,"ตับคน","2025-12-10")
   )
 
-  private lateinit var adapter: ProductAdapter
 
-  override fun onCreateView(
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        fullList = productList
+        adapter = ProductAdapter(
+            fullList,
+            onItemClick = { product -> },
+            onEditClick = { product ->
+                val dialog = EditDialogFragment.newInstance(product)
+                dialog.show(parentFragmentManager, "EditProductDialog")
+            }
+        )
+
+        binding.statusGroup.setOnCheckedChangeListener { _, checkedId ->
+            when (checkedId) {
+                R.id.btnall -> filterByStatus("ทั้งหมด")
+                R.id.btnlow -> filterByStatus("น้อย")
+                R.id.btnout -> filterByStatus("หมด")
+            }
+        }
+
+
+        binding.recyclerViewProducts.adapter = adapter
+        binding.recyclerViewProducts.layoutManager = LinearLayoutManager(requireContext())
+
+        binding.planetsSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                val selectedType = parent.getItemAtPosition(position).toString()
+                filterList(selectedType)
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {}
+        }
+    }
+
+
+    private fun filterByStatus(status: String) {
+        val filtered = when (status) {
+            "ทั้งหมด" -> productList
+            "น้อย" -> productList.filter { it.status == "น้อย" }
+            "หมด" -> productList.filter { it.status == "หมด" }
+            else -> productList
+        }
+
+        adapter.updateData(filtered)
+    }
+
+
+
+    private fun filterList(type: String) {
+        val newList = when (type) {
+            "ทั้งหมด" -> fullList
+            "ผัก" -> fullList.filter { it.typ == "ผัก" }
+            "เครื่องเคียง" -> fullList.filter { it.typ == "เครื่องเคียง" }
+            "เนื้อสัตว์" -> fullList.filter { it.typ == "เนื้อสัตว์" }
+            else -> fullList
+        }
+
+        adapter.updateData(newList)
+    }
+
+
+
+
+
+
+    override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
     savedInstanceState: Bundle?

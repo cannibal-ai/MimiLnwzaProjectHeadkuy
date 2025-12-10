@@ -51,6 +51,11 @@ class ProductAdapter(
     override fun getItemCount(): Int = filteredProducts.size
 
 
+    fun updateData(newList: List<Product>) {
+        filteredProducts = newList
+        notifyDataSetChanged()
+    }
+
     private fun normalizeThai(text: String): String {
         return Normalizer.normalize(text, Normalizer.Form.NFD)
             .replace("\\p{Mn}+".toRegex(), "")

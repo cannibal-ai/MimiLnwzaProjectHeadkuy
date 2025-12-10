@@ -52,7 +52,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="ยอดรวมรายรับเดือนนี้"
+                    android:text="ยอดรวมจ่ายวัตถุดิบเดือนนี้"
                     android:textColor="#666666"
                     android:textSize="16sp" />
 
@@ -137,7 +137,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="รายรับวันนี้"
+                android:text="ราคาวัตถุดิบวันี้"
                 android:textColor="#333333"
                 android:textSize="16sp"
                 android:textStyle="bold" />
@@ -199,7 +199,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="ส่วนต่างจากเมื่อวาน"
+                android:text="ส่วนต่างจากเดือนก่อน"
                 android:textColor="#333333"
                 android:textSize="16sp" />
 
