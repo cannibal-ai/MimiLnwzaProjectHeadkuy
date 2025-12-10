@@ -20,7 +20,7 @@ class historyFragment : Fragment() {
 
     private val historyList = mutableListOf(
         ProductHis(R.drawable.mugrob,"หมูกรอบ", "20/12/2025 16:50", "ใหม่"),
-        ProductHis(R.drawable.images,"ผักกาก", "20/12/2025 16:50", null),
+        ProductHis(R.drawable.images,"ผักกาด", "20/12/2025 16:50", null),
         ProductHis(R.drawable.o,"เส้นใหญ่", "20/12/2025 16:50", null)
     )
 

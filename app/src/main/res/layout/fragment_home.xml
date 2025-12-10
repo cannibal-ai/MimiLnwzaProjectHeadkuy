@@ -196,7 +196,7 @@
         android:layout_marginStart="24dp"
         android:layout_marginTop="10dp"
         android:layout_marginEnd="24dp"
-        android:backgroundTint="#D3886C"
+        android:backgroundTint="#3A3A3A"
         app:cardCornerRadius="10dp"
         app:cardElevation="10dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -217,14 +217,7 @@
                 android:layout_gravity="center_vertical"
                 android:layout_marginStart="5dp"
                 android:src="@drawable/outline_emergency_home_24"
-                app:tint="#520720" />
-            <ImageView
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:layout_gravity="center_vertical"
-                android:layout_marginStart="5dp"
-                android:src="@drawable/outline_emergency_home_24"
-                app:tint="#520720" />
+                app:tint="#E91E1E" />
 
             <LinearLayout
                 android:layout_width="wrap_content"

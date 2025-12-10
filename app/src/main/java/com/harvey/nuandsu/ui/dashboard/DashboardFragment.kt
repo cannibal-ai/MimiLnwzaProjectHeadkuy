@@ -24,18 +24,14 @@ class DashboardFragment : Fragment() {
   private val binding get() = _binding!!
 
   private val productList = mutableListOf(
-    Product("Coke", 10, "หมด", R.drawable.mu),
-    Product("Pepsi", 5, "น้อย", R.drawable.mu),
-    Product("Sprite", 20, null, R.drawable.mu),
-    Product("Coke", 10, "หมด", R.drawable.mu),
-    Product("Pepsi", 5, "น้อย", R.drawable.mu),
-    Product("Sprite", 20, null, R.drawable.mu),
-    Product("Coke", 10, "หมด", R.drawable.mu),
-    Product("Pepsi", 5, "น้อย", R.drawable.mu),
-    Product("Sprite", 20, null, R.drawable.mu),
-    Product("Coke", 10, "หมด", R.drawable.mu),
-    Product("Pepsi", 5, "น้อย", R.drawable.mu),
-    Product("Sprite", 20, null, R.drawable.mu)
+      Product("เส้นใหญ่", 10, null, R.drawable.o,"เครื่องเคียง",20,"เส้นใหญ่ไม่ใช่เส้นเล็ก"),
+      Product("ผักกาด", 5, "น้อย", R.drawable.images,"ผัก",10,"ผักกากมันใส่ในก๋วยจั๊บด้วยหรอวะ"),
+      Product("หมูกรอบ", 20, "หมด", R.drawable.mugrob,"เนื้อสัตว์",200,"หมูกรอบมีมี่ชอบ"),
+      Product("น้ำตาล", 10, "หมด", R.drawable.num,"เครื่องเคียง",5,"น้ำตาลหวานร้อย"),
+      Product("น้ำปลา", 5, "น้อย", R.drawable.numpra,"เครื่องเคียง",20,"น้ำตาลเค็มนำ"),
+      Product("พริกป่น", 20, null, R.drawable.prik,"เครื่องเคียง",20,"เผ็ดจนแสบตูด"),
+      Product("ก๋วยจั๊บ", 20, null, R.drawable.mama,"เครื่องเคียง",20,"ก๋วยจั๊บเขม"),
+      Product("ตับ", 20, null, R.drawable.tub,"เนื้อสัตว์",20,"ตับคน")
   )
 
   private lateinit var adapter: ProductAdapter
@@ -56,14 +52,15 @@ class DashboardFragment : Fragment() {
   }
 
   private fun setupRecyclerView() {
-    adapter = ProductAdapter(productList,
-      onItemClick = { position -> },
-      onEditClick = { product ->
-        val dialog = EditDialogFragment()
-        dialog.show(parentFragmentManager, "EditProductDialog")
-      }
-    )
-    binding.recyclerViewProducts.layoutManager = LinearLayoutManager(requireContext())
+      adapter = ProductAdapter(productList,
+          onItemClick = { position -> },
+          onEditClick = { product ->
+              val dialog = EditDialogFragment.newInstance(product)
+              dialog.show(parentFragmentManager, "EditProductDialog")
+          }
+      )
+
+      binding.recyclerViewProducts.layoutManager = LinearLayoutManager(requireContext())
     binding.recyclerViewProducts.adapter = adapter
   }
 
@@ -76,6 +73,8 @@ class DashboardFragment : Fragment() {
       override fun afterTextChanged(s: Editable?) {}
     })
   }
+
+
 
   private fun setupAddProductClick() {
     binding.Card.setOnClickListener {

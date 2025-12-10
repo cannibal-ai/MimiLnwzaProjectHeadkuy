@@ -129,8 +129,10 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewProducts"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="450dp"
+        android:layout_marginStart="6dp"
         android:layout_marginTop="335dp"
+        android:layout_marginEnd="6dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toEndOf="@+id/Search"

@@ -18,12 +18,10 @@
         tools:ignore="MissingConstraints">
 
         <ImageView
-            android:id="@+id/ivProductImageEdit"
+            android:id="@+id/imgFoodEdit"
             android:layout_width="match_parent"
-            android:layout_height="200dp"
+            android:layout_height="250dp"
             android:layout_marginBottom="10dp"
-            android:scaleType="centerCrop"
-            android:background="@drawable/mu"
             android:contentDescription="Product Image" />
 
         <LinearLayout
@@ -32,8 +30,8 @@
             android:orientation="horizontal">
 
             <EditText
-                android:id="@+id/etProductNameEdit"
-                android:text="บลาๆๆ"
+                android:id="@+id/edtName"
+                android:text=""
                 android:textColor="@color/black"
                 android:textColorHint="#A8A8A8"
                 android:hint="ชื่อ"
@@ -50,7 +48,6 @@
                 android:background="@android:color/transparent"
                 android:scaleType="fitCenter"
                 android:adjustViewBounds="true"
-
                 android:padding="6dp"
                 android:layout_marginEnd="6dp"/>
 
@@ -63,7 +60,7 @@
 
             <EditText
                 android:id="@+id/etPriceEdit"
-                android:text="5"
+                android:text=""
                 android:hint="ราคา"
                 android:textColor="@color/black"
                 android:textColorHint="#A8A8A8"
@@ -93,7 +90,7 @@
 
             <EditText
                 android:id="@+id/etTypeEdit"
-                android:text="บลาๆๆ"
+                android:text=""
                 android:hint="ประเภท"
                 android:textColor="@color/black"
                 android:textColorHint="#A8A8A8"
@@ -121,8 +118,8 @@
             android:orientation="horizontal">
 
             <EditText
-                android:id="@+id/etManyEdit"
-                android:text="20"
+                android:id="@+id/edtQuantity"
+                android:text=""
                 android:hint="จำนวน"
                 android:textColor="@color/black"
                 android:textColorHint="#A8A8A8"
@@ -152,7 +149,7 @@
 
             <EditText
                 android:id="@+id/etDescriptionEdit"
-                android:text="บลาๆๆ"
+                android:text=""
                 android:hint="รายละเอียด"
                 android:textColor="@color/black"
                 android:textColorHint="#A8A8A8"
@@ -180,20 +177,20 @@
 
         <Button
             android:id="@+id/btnAddEdit"
-            android:backgroundTint="#366B50"
+            android:backgroundTint="@color/teal_700"
             android:text="ยืนยันเพื่อแก้ไข"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"/>
 
         <Button
             android:id="@+id/btnDelete"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="35dp"
             android:text="ลบรายการวัตถุดิบ"
             android:textColor="#E91E63"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:paddingHorizontal="12dp"
-            android:paddingVertical="6dp"
+
             android:textSize="14sp"/>
 
     </LinearLayout>

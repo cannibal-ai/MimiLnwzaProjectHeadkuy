@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import java.text.Normalizer
 
 class ProductAdapter(
     private val allProducts: List<Product>,
@@ -44,19 +45,38 @@ class ProductAdapter(
         holder.tvName.text = product.name
         holder.tvQuantity.text = product.quantity.toString()
         holder.tvStatus.text = product.status
-        holder.tvImg.setImageResource(product.imag)
+        holder.tvImg.setImageResource(product.image)
     }
 
     override fun getItemCount(): Int = filteredProducts.size
 
+
+    private fun normalizeThai(text: String): String {
+        return Normalizer.normalize(text, Normalizer.Form.NFD)
+            .replace("\\p{Mn}+".toRegex(), "")
+            .lowercase()
+    }
+
     fun filter(query: String) {
-        filteredProducts = if (query.isEmpty()) {
+        val normalizedQuery = normalizeThai(query)
+
+        filteredProducts = if (normalizedQuery.isEmpty()) {
             allProducts
         } else {
             allProducts.filter {
-                it.name.contains(query, ignoreCase = true)
+                normalizeThai(it.name).contains(normalizedQuery)
             }
+        }
+
+        notifyDataSetChanged()
+    }
+
+    fun filterByStatus(status: String?) {
+        filteredProducts = when (status) {
+            null, "all" -> allProducts
+            else -> allProducts.filter { it.status == status }
         }
         notifyDataSetChanged()
     }
+
 }

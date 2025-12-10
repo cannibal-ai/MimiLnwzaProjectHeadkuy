@@ -8,8 +8,8 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@drawable/logo2"
-        android:roundIcon="@drawable/logo2"
+        android:icon="@drawable/logo"
+        android:roundIcon="@drawable/logo"
         android:supportsRtl="true"
         android:theme="@style/Theme.NuandSU.LIght" >
         <activity

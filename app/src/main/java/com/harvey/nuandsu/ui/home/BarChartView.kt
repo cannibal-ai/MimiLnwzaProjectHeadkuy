@@ -51,7 +51,6 @@ class BarChartView(context: Context, attrs: AttributeSet? = null) : View(context
         val maxVal = values.maxOrNull() ?: 1f
         val barWidth = width / (values.size * 2f)
 
-        // 🔹 วาดเส้น baseli
         canvas.drawLine(0f, height.toFloat(), width.toFloat(), height.toFloat(), baselinePaint)
 
         values.forEachIndexed { index, v ->

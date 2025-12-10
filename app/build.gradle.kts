@@ -57,6 +57,7 @@ dependencies {
     // Navigation (เลือกชุดเดียวพอ!!)
     implementation("androidx.navigation:navigation-fragment-ktx:2.8.3")
     implementation("androidx.navigation:navigation-ui-ktx:2.8.3")
+    implementation(libs.transport.api)
 
     // Test
     testImplementation("junit:junit:4.13.2")
