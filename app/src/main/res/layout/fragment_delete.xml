@@ -25,21 +25,22 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="ยืนยันการลบ"
-            android:textSize="16dp"
+            android:textSize="20dp"
             android:textColor="@color/black"/>
 
         <TextView
+            android:id="@+id/tvMessage"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="ุคณแน่ใจว่าจะลบ ${product?.name} หรือไม่?"
+            android:text="คุณแน่ใจว่าจะลบ ?"
             android:textSize="16dp"
-            android:textColor="@color/black"/>
+            android:textColor="#6e6e6e" />
+
 
 
 
         <Button
             android:id="@+id/btnYesDe"
-
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:backgroundTint="#E91E63"

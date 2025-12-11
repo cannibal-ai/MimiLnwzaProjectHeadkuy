@@ -11,7 +11,7 @@ import java.text.Normalizer
 class ProductAdapter(
 
     private val allProducts: List<Product>,
-    private val onItemClick: ProductAdapter.OnProductInteractionListener,
+    private val onItemClick: (Int) -> Unit,
     private val onEditClick: (Product) -> Unit
 ) : RecyclerView.Adapter<ProductAdapter.ProductViewHolder>() {
 

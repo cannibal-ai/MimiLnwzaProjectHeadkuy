@@ -113,6 +113,7 @@ class DashboardFragment : Fragment() {
         setupSearch()
         setupAddProductClick()
 
+
         return root
     }
 
@@ -138,7 +139,6 @@ class DashboardFragment : Fragment() {
             override fun afterTextChanged(s: Editable?) {}
         })
     }
-
 
 
     private fun setupAddProductClick() {

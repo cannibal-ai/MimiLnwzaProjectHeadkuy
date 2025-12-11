@@ -1,38 +1,53 @@
 package com.harvey.nuandsu.ui.home
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
-import com.harvey.nuandsu.databinding.FragmentHomeBinding
-
-
-
+import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.data.LineData
+import com.github.mikephil.charting.data.LineDataSet
+import com.harvey.nuandsu.R
 
 class HomeFragment : Fragment() {
-    private var _binding: FragmentHomeBinding? = null
-    // This property is only valid between onCreateView and
-// onDestroyView.
-    private val binding get() = _binding!!
+
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
+        inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View { val homeViewModel = ViewModelProvider(this).get(HomeViewModel::class.java)
-        _binding = FragmentHomeBinding.inflate(inflater, container, false)
-        val root: View = binding.root
-        binding.barChartView.values = listOf(2000f, 4000f, 8000f, 6000f, 7000f, 9000f, 10000f)
-        // val textView: TextView = binding.textHome
-        // homeViewModel.text.observe(viewLifecycleOwner) {
-        // textView.text = it
-        // }
-        return root
+    ): View? {
+        return inflater.inflate(R.layout.fragment_home, container, false)
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        val lineChart = view.findViewById<LineChart>(R.id.lineChart)
+
+        val entries = ArrayList<Entry>()
+        for (day in 1..30) {
+            val value = (10..50).random().toFloat()
+            entries.add(Entry(day.toFloat(), value))
+        }
+
+        val dataSet = LineDataSet(entries, "ยอดขาย 30 วัน")
+        dataSet.color = Color.parseColor("#336725")
+        dataSet.valueTextColor = Color.BLACK
+        dataSet.lineWidth = 2f
+        dataSet.circleRadius = 4f
+        dataSet.setCircleColor(Color.RED)
+        dataSet.setDrawFilled(true)
+        dataSet.fillColor =  Color.parseColor("#69C542")
+        dataSet.mode = LineDataSet.Mode.CUBIC_BEZIER
+
+        // 3️⃣ สร้าง LineData
+        val lineData = LineData(dataSet)
+
+        // 4️⃣ ใส่ข้อมูลให้ Chart
+        lineChart.data = lineData
+        lineChart.description.isEnabled = false
+        lineChart.invalidate() // Refresh Chart
     }
 }
