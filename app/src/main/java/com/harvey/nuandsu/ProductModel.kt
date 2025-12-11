@@ -9,7 +9,8 @@ data class Product(
     val status: String? = null,
     val image: Int,
     val typ: String,
-    val pc : Int,
+    val pc: Int = 0,
     val des : String,
-    val date : String
+    val date: String = ""
 ) : Serializable
+

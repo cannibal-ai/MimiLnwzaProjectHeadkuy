@@ -290,11 +290,10 @@
                 android:textSize="20sp"
                 android:textColor="@color/black" />
 
-            <com.github.mikephil.charting.charts.LineChart
-                android:id="@+id/lineChart"
+            <com.harvey.nuandsu.ui.home.BarChartView
+                android:id="@+id/barChartView"
                 android:layout_width="match_parent"
-                android:layout_height="150dp"
-               />
+                android:layout_height="120dp"/>
 
         </LinearLayout>
 

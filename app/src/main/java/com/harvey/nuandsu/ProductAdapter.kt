@@ -9,12 +9,14 @@ import androidx.recyclerview.widget.RecyclerView
 import java.text.Normalizer
 
 class ProductAdapter(
+
     private val allProducts: List<Product>,
-    private val onItemClick: (Int) -> Unit,
+    private val onItemClick: ProductAdapter.OnProductInteractionListener,
     private val onEditClick: (Product) -> Unit
 ) : RecyclerView.Adapter<ProductAdapter.ProductViewHolder>() {
 
     private var filteredProducts: List<Product> = allProducts.toList()
+
 
     inner class ProductViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tvImg: ImageView = itemView.findViewById(R.id.imgIngredient)
@@ -22,6 +24,7 @@ class ProductAdapter(
         val tvQuantity: TextView = itemView.findViewById(R.id.txtStock)
         val tvStatus: TextView = itemView.findViewById(R.id.status)
         val btnEdit: View = itemView.findViewById(R.id.btnEdit)
+
 
         init {
             itemView.setOnClickListener {
@@ -31,6 +34,7 @@ class ProductAdapter(
                 val product = filteredProducts[adapterPosition]
                 onEditClick(product)
             }
+
         }
     }
 
@@ -46,6 +50,14 @@ class ProductAdapter(
         holder.tvQuantity.text = product.quantity.toString()
         holder.tvStatus.text = product.status
         holder.tvImg.setImageResource(product.image)
+
+        when (product.status) {
+            "หมด" -> holder.tvStatus.setTextColor(android.graphics.Color.RED)
+            "น้อย" -> holder.tvStatus.setTextColor(android.graphics.Color.parseColor("#FFA500"))
+            "ทั้งหมด" -> holder.tvStatus.setTextColor(android.graphics.Color.GREEN)
+            null -> holder.tvStatus.setTextColor(android.graphics.Color.GRAY)
+            else -> holder.tvStatus.setTextColor(android.graphics.Color.GRAY)
+        }
     }
 
     override fun getItemCount(): Int = filteredProducts.size
