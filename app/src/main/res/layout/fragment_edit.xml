@@ -38,19 +38,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"/>
-            <ImageButton
-                android:id="@+id/btnEdit1"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:layout_marginTop="10dp"
-                android:src="@drawable/edit"
-                android:contentDescription="แก้ไข"
-                android:background="@android:color/transparent"
-                android:scaleType="fitCenter"
-                android:adjustViewBounds="true"
-                android:padding="6dp"
-                android:layout_marginEnd="6dp"
-                app:tint="#A8A8A8"/>
+
 
         </LinearLayout>
 
@@ -69,19 +57,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"/>
-            <ImageButton
-                android:id="@+id/btnEdit2"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:layout_marginTop="10dp"
-                android:src="@drawable/edit"
-                android:contentDescription="แก้ไข"
-                android:background="@android:color/transparent"
-                android:scaleType="fitCenter"
-                android:adjustViewBounds="true"
-                android:padding="6dp"
-                android:layout_marginEnd="6dp"
-                app:tint="#A8A8A8"/>
+
 
         </LinearLayout>
 
@@ -99,19 +75,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"/>
-            <ImageButton
-                android:id="@+id/btnEdit3"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:layout_marginTop="10dp"
-                android:src="@drawable/edit"
-                android:contentDescription="แก้ไข"
-                android:background="@android:color/transparent"
-                android:scaleType="fitCenter"
-                android:adjustViewBounds="true"
-                android:padding="6dp"
-                android:layout_marginEnd="6dp"
-                app:tint="#A8A8A8"/>
+
 
         </LinearLayout>
 
@@ -130,19 +94,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"/>
-            <ImageButton
-                android:id="@+id/btnEdit4"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:layout_marginTop="10dp"
-                android:src="@drawable/edit"
-                android:contentDescription="แก้ไข"
-                android:background="@android:color/transparent"
-                android:scaleType="fitCenter"
-                android:adjustViewBounds="true"
-                android:padding="6dp"
-                android:layout_marginEnd="6dp"
-                app:tint="#A8A8A8"/>
+
 
         </LinearLayout>
 
@@ -161,19 +113,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"/>
 
-            <ImageButton
-                android:id="@+id/btnEdit5"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:layout_marginTop="10dp"
-                android:src="@drawable/edit"
-                android:contentDescription="แก้ไข"
-                android:background="@android:color/transparent"
-                android:scaleType="fitCenter"
-                android:adjustViewBounds="true"
-                android:padding="6dp"
-                android:layout_marginEnd="6dp"
-                app:tint="#A8A8A8"/>
+
 
 
 
@@ -191,7 +131,7 @@
         <Button
             android:id="@+id/btnDelete"
             android:layout_width="match_parent"
-            android:layout_height="35dp"
+            android:layout_height="40dp"
             android:text="ลบรายการวัตถุดิบ"
             android:textColor="#E91E63"
             android:background="?attr/selectableItemBackgroundBorderless"

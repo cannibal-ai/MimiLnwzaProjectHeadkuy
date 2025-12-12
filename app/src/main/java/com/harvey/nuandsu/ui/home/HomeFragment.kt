@@ -33,21 +33,20 @@ class HomeFragment : Fragment() {
         }
 
         val dataSet = LineDataSet(entries, "ยอดขาย 30 วัน")
-        dataSet.color = Color.parseColor("#336725")
+        dataSet.color = Color.parseColor("#6C4F35")
         dataSet.valueTextColor = Color.BLACK
         dataSet.lineWidth = 2f
         dataSet.circleRadius = 4f
         dataSet.setCircleColor(Color.RED)
         dataSet.setDrawFilled(true)
-        dataSet.fillColor =  Color.parseColor("#69C542")
+        dataSet.fillColor =  Color.parseColor("#e8d3bd")
         dataSet.mode = LineDataSet.Mode.CUBIC_BEZIER
 
-        // 3️⃣ สร้าง LineData
+
         val lineData = LineData(dataSet)
 
-        // 4️⃣ ใส่ข้อมูลให้ Chart
         lineChart.data = lineData
         lineChart.description.isEnabled = false
-        lineChart.invalidate() // Refresh Chart
+        lineChart.invalidate()
     }
 }

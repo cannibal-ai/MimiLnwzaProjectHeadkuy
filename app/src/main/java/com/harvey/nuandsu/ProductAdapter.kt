@@ -1,99 +1,91 @@
 package com.harvey.nuandsu
 
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import java.text.Normalizer
+import com.bumptech.glide.Glide
 
 class ProductAdapter(
+    private var productList: MutableList<Product>,
+    private val onItemClick: (Product) -> Unit,
+    private val onEditClick: (Product) -> Unit,
+    private val onDeleteClick: (Product) -> Unit
+) : RecyclerView.Adapter<ProductAdapter.ViewHolder>() {
 
-    private val allProducts: List<Product>,
-    private val onItemClick: (Int) -> Unit,
-    private val onEditClick: (Product) -> Unit
-) : RecyclerView.Adapter<ProductAdapter.ProductViewHolder>() {
-
-    private var filteredProducts: List<Product> = allProducts.toList()
-
-
-    inner class ProductViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val tvImg: ImageView = itemView.findViewById(R.id.imgIngredient)
-        val tvName: TextView = itemView.findViewById(R.id.txtName)
-        val tvQuantity: TextView = itemView.findViewById(R.id.txtStock)
-        val tvStatus: TextView = itemView.findViewById(R.id.status)
-        val btnEdit: View = itemView.findViewById(R.id.btnEdit)
-
-
-        init {
-            itemView.setOnClickListener {
-                onItemClick(adapterPosition)
-            }
-            btnEdit.setOnClickListener {
-                val product = filteredProducts[adapterPosition]
-                onEditClick(product)
-            }
-
-        }
+    class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val name: TextView = itemView.findViewById(R.id.txtName)
+        val qty: TextView = itemView.findViewById(R.id.txtStock)
+        val status: TextView = itemView.findViewById(R.id.status)
+        val btnEdit: Button = itemView.findViewById(R.id.btnEdit)
+        val img: ImageView = itemView.findViewById(R.id.imgIngredient)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProductViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_product, parent, false)
-        return ProductViewHolder(view)
+        return ViewHolder(view)
     }
 
-    override fun onBindViewHolder(holder: ProductViewHolder, position: Int) {
-        val product = filteredProducts[position]
-        holder.tvName.text = product.name
-        holder.tvQuantity.text = product.quantity.toString()
-        holder.tvStatus.text = product.status
-        holder.tvImg.setImageResource(product.image)
+    override fun getItemCount(): Int = productList.size
 
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val product = productList[position]
+
+        holder.name.text = product.name
+        holder.qty.text = product.quantity.toString()
+        holder.status.text = product.status ?: ""
+
+        Glide.with(holder.itemView.context)
+            .load(product.imageUri)
+            .into(holder.img)
+
+        // 🎨 เปลี่ยนสีตามสถานะ
         when (product.status) {
-            "หมด" -> holder.tvStatus.setTextColor(android.graphics.Color.RED)
-            "น้อย" -> holder.tvStatus.setTextColor(android.graphics.Color.parseColor("#FFA500"))
-            "ทั้งหมด" -> holder.tvStatus.setTextColor(android.graphics.Color.GREEN)
-            null -> holder.tvStatus.setTextColor(android.graphics.Color.GRAY)
-            else -> holder.tvStatus.setTextColor(android.graphics.Color.GRAY)
-        }
-    }
-
-    override fun getItemCount(): Int = filteredProducts.size
-
-
-    fun updateData(newList: List<Product>) {
-        filteredProducts = newList
-        notifyDataSetChanged()
-    }
-
-    private fun normalizeThai(text: String): String {
-        return Normalizer.normalize(text, Normalizer.Form.NFD)
-            .replace("\\p{Mn}+".toRegex(), "")
-            .lowercase()
-    }
-
-    fun filter(query: String) {
-        val normalizedQuery = normalizeThai(query)
-
-        filteredProducts = if (normalizedQuery.isEmpty()) {
-            allProducts
-        } else {
-            allProducts.filter {
-                normalizeThai(it.name).contains(normalizedQuery)
+            "หมด" -> {
+                holder.status.setTextColor(Color.RED)
+            }
+            "น้อย" -> {
+                holder.status.setTextColor(Color.parseColor("#FFA726"))
+            }
+            else -> {
+                holder.status.setTextColor(Color.BLACK)
             }
         }
 
-        notifyDataSetChanged()
+        holder.itemView.setOnClickListener { onItemClick(product) }
+        holder.btnEdit.setOnClickListener { onEditClick(product) }
     }
 
-    fun filterByStatus(status: String?) {
-        filteredProducts = when (status) {
-            null, "all" -> allProducts
-            else -> allProducts.filter { it.status == status }
+    private var originalList: MutableList<Product> = productList.toMutableList()
+
+    fun filter(query: String) {
+        val filtered = if (query.isEmpty()) {
+            originalList
+        } else {
+            originalList.filter {
+                it.name.contains(query, ignoreCase = true) ||
+                        (it.status?.contains(query, ignoreCase = true) ?: false) ||
+                        (it.typ?.contains(query, ignoreCase = true) ?: false)
+            }.toMutableList()
         }
+
+        productList = filtered
         notifyDataSetChanged()
     }
 
+    fun updateData(newList: List<Product>) {
+        originalList = newList.toMutableList()
+        productList = newList.toMutableList()
+        notifyDataSetChanged()
+    }
+
+    fun addProduct(product: Product) {
+        productList.add(product)
+        notifyItemInserted(productList.size - 1)
+    }
 }
