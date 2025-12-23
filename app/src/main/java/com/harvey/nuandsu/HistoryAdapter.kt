@@ -57,5 +57,12 @@ class HistoryAdapter(
         }
         notifyDataSetChanged()
     }
+
+    fun updateData(newList: List<ProductHis>) {
+        allProducts = newList
+        filteredProducts = newList
+        notifyDataSetChanged()
+    }
+
 }
 

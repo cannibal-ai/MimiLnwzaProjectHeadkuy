@@ -1,5 +1,6 @@
 package com.harvey.nuandsu.ui.notifications
 
+import DBHelper
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -8,10 +9,21 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.harvey.nuandsu.databinding.FragmentNotificationsBinding
+import java.util.Locale
 
 class NotificationsFragment : Fragment() {
 
-private var _binding: FragmentNotificationsBinding? = null
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        val monthFormat = java.text.SimpleDateFormat("MMMM yyyy", Locale("th", "TH"))
+        binding.textViewDate.text = monthFormat.format(java.util.Date())
+    }
+
+
+
+    private var _binding: FragmentNotificationsBinding? = null
   // This property is only valid between onCreateView and
   // onDestroyView.
   private val binding get() = _binding!!
@@ -35,8 +47,19 @@ private var _binding: FragmentNotificationsBinding? = null
       return root
   }
 
+    override fun onResume() {
+        super.onResume()
 
-override fun onDestroyView() {
+        val dbHelper = DBHelper(requireContext())
+        val total = dbHelper.getCurrentMonthTotal()
+
+        binding.textViewMonthlyAmount.text = "%,d".format(total)
+    }
+
+
+
+
+    override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }

@@ -41,6 +41,14 @@ class DashboardFragment : Fragment() {
         setupStatusFilter()
         setupTypeFilter()
 
+        parentFragmentManager.setFragmentResultListener(
+            "product_changed",
+            viewLifecycleOwner
+        ) { _, _ ->
+            refreshList()
+        }
+
+
         return binding.root
     }
 
@@ -98,7 +106,37 @@ class DashboardFragment : Fragment() {
 
 
     // ---------------- Type Filter (Spinner) ----------------
+
+
     private fun setupTypeFilter() {
+        val adapterSpinner = android.widget.ArrayAdapter.createFromResource(
+            requireContext(),
+            com.harvey.nuandsu.R.array.planets_array, // array ของ Spinner
+            com.harvey.nuandsu.R.layout.spinner_item  // layout ตัวอักษรสีดำ
+        )
+
+        adapterSpinner.setDropDownViewResource(
+            android.R.layout.simple_spinner_dropdown_item
+        )
+
+        binding.planetsSpinner.adapter = adapterSpinner
+
+        binding.planetsSpinner.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+
+                override fun onItemSelected(
+                    parent: AdapterView<*>,
+                    view: View?,
+                    pos: Int,
+                    id: Long
+                ) {
+                    val type = parent.getItemAtPosition(pos).toString()
+                    filterByType(type)
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>) {}
+            }
+
         binding.planetsSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, pos: Int, id: Long) {
                 val type = parent.getItemAtPosition(pos).toString()
@@ -117,6 +155,8 @@ class DashboardFragment : Fragment() {
     }
 
 
+
+
     // ---------------- Add Product Button ----------------
     private fun setupAddProduct() {
         binding.Card.setOnClickListener {
@@ -128,12 +168,22 @@ class DashboardFragment : Fragment() {
     // ---------------- Refresh Data After Delete/Edit ----------------
     fun refreshList() {
         fullList = db.getAllProducts()
+
+        binding.planetsSpinner.setSelection(0)
+
         adapter.updateData(fullList)
     }
+
 
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
+
+    override fun onResume() {
+        super.onResume()
+        refreshList()
+    }
+
 }

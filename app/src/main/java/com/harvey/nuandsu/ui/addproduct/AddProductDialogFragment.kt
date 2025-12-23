@@ -6,17 +6,29 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.Spinner
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.DialogFragment
 import com.harvey.nuandsu.Product
 import com.harvey.nuandsu.R
 import com.harvey.nuandsu.ui.dashboard.DashboardFragment
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+
 
 class AddProductDialogFragment : DialogFragment() {
+
+    val now = LocalDateTime.now()
+    val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
+    val dateTimeNow = now.format(formatter)
+
+
+
 
     private var selectedImageUri: Uri? = null
     private lateinit var imagePickerLauncher: ActivityResultLauncher<String>
@@ -25,7 +37,8 @@ class AddProductDialogFragment : DialogFragment() {
 
     private lateinit var nameEt: EditText
     private lateinit var qtyEt: EditText
-    private lateinit var typeEt: EditText
+    private lateinit var typeEt: Spinner
+
     private lateinit var statusEt: EditText
     private lateinit var descEt: EditText
 
@@ -56,9 +69,17 @@ class AddProductDialogFragment : DialogFragment() {
             imagePickerLauncher.launch("image/*")
         }
 
+
+
+
         addBtn.setOnClickListener {
             val name = nameEt.text.toString()
-            val type = typeEt.text.toString()
+            val type = typeEt.selectedItem.toString()
+            if (type == "เลือกประเภท") {
+                typeEt.requestFocus()
+                return@setOnClickListener
+            }
+
             val qty = qtyEt.text.toString().toIntOrNull() ?: 0
             val status = when {
                 qty == 0 -> "หมด"
@@ -78,9 +99,12 @@ class AddProductDialogFragment : DialogFragment() {
                     imageUri = selectedImageUri?.toString(),
                     typ = type,
                     des = desc,
-                    date = date,
+                    date = dateTimeNow
                 )
             ).toInt()
+
+
+
 
             val newProduct = Product(
                 id = newId,
@@ -90,12 +114,29 @@ class AddProductDialogFragment : DialogFragment() {
                 imageUri = selectedImageUri?.toString(),
                 typ = type,
                 des = desc,
-                date = date,
             )
 
+
             (parentFragment as? DashboardFragment)?.adapter?.addProduct(newProduct)
+
+            parentFragmentManager.setFragmentResult(
+                "product_changed",
+                Bundle()
+            )
             dismiss()
         }
+        val adapter = ArrayAdapter.createFromResource(
+            requireContext(),
+            R.array.product_types_filter,
+            R.layout.spinner_item
+        )
+
+        adapter.setDropDownViewResource(
+            android.R.layout.simple_spinner_dropdown_item
+        )
+
+        typeEt.adapter = adapter
+
 
         return view
     }

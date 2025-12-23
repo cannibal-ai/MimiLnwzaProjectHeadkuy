@@ -5,5 +5,15 @@
         <item>ผัก</item>
         <item>เครื่องเคียง</item>
         <item>เนื้อสัตว์</item>
+        <item>เครื่องปรุง</item>
     </string-array>
+
+    <string-array name="product_types_filter">
+        <item>เลือกประเภทของวัตถุดิบ</item>
+        <item>ผัก</item>
+        <item>เครื่องเคียง</item>
+        <item>เนื้อสัตว์</item>
+        <item>เครื่องปรุง</item>
+    </string-array>
+
 </resources>

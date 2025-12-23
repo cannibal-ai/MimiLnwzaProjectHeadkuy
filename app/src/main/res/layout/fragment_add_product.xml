@@ -61,14 +61,15 @@
             android:textColor="@color/black"
             android:textColorHint="#A8A8A8" />
 
-        <EditText
+        <Spinner
             android:id="@+id/etType"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="ประเภท"
-            android:text=""
-            android:textColor="@color/black"
-            android:textColorHint="#A8A8A8" />
+            android:layout_height="45dp"
+            android:layout_weight="1"
+            android:background="#E0E0E0"
+            android:spinnerMode="dropdown"
+            android:popupTheme="@style/SpinnerPopupTheme"/>
+
 
         <EditText
             android:id="@+id/etMany"

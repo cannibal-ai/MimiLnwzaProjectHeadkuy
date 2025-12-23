@@ -1,5 +1,6 @@
 package com.harvey.nuandsu.ui.history
 
+import DBHelper
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -18,11 +19,32 @@ class historyFragment : Fragment() {
     private var _binding: FragmentHistoryBinding? = null
     private val binding get() = _binding!!
 
-    private val historyList = mutableListOf(
-        ProductHis(R.drawable.mugrob,"หมูกรอบ", "20/12/2025 16:50", "ใหม่"),
-        ProductHis(R.drawable.images,"ผักกาด", "20/12/2025 16:50", null),
-        ProductHis(R.drawable.o,"เส้นใหญ่", "20/12/2025 16:50", null)
-    )
+    private val historyList = mutableListOf<ProductHis>()
+
+
+    private fun loadHistory() {
+        val dbHelper = DBHelper(requireContext())
+        val products = dbHelper.getAllProducts()
+
+
+        historyList.clear()
+
+        for ((index, p) in products.withIndex()) {
+            historyList.add(
+                ProductHis(
+                    image = R.drawable.images,
+                    name = p.name,
+                    time = p.date,
+                    new = if (index == 0) "ใหม่" else null
+                )
+            )
+        }
+        adapter.updateData(historyList)
+
+    }
+
+
+
 
     private lateinit var adapter: HistoryAdapter
 
@@ -32,13 +54,14 @@ class historyFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentHistoryBinding.inflate(inflater, container, false)
-        val root: View = binding.root
 
         setupRecyclerView()
         setupSearch()
+        loadHistory()
 
-        return root
+        return binding.root
     }
+
 
     private fun setupRecyclerView() {
         adapter = HistoryAdapter(historyList) { history ->

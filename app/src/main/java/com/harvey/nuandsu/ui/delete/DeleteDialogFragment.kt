@@ -52,6 +52,11 @@ class DeleteDialogFragment : DialogFragment() {
                 dash.refreshList()
             }
 
+            parentFragmentManager.setFragmentResult(
+                "product_changed",
+                Bundle()
+            )
+
             dismiss()               // ปิด popup ลบ
             parentFragmentManager.findFragmentByTag("EditProductDialog")?.let {
                 (it as DialogFragment).dismiss()  // ปิดหน้า Edit ด้วย

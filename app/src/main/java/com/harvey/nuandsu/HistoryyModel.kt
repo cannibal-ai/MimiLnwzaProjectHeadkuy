@@ -1,6 +1,5 @@
 package com.harvey.nuandsu
 
-import android.R
 
 
 data class ProductHis(

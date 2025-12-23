@@ -3,8 +3,12 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import com.harvey.nuandsu.Product
+import java.util.Date
+import java.util.Locale
 
 class DBHelper(context: Context) : SQLiteOpenHelper(context, "MyDB.db", null, 1) {
+
+
 
     override fun onCreate(db: SQLiteDatabase) {
         // สร้างตาราง products
@@ -73,28 +77,116 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "MyDB.db", null, 1)
     }
 
 
-    // ดึงสินค้าทั้งหมด
     fun getAllProducts(): List<Product> {
         val list = mutableListOf<Product>()
         val db = readableDatabase
-        val cursor = db.rawQuery("SELECT * FROM products", null)
+
+        val cursor = db.rawQuery(
+            "SELECT * FROM products ORDER BY date DESC",
+            null
+        )
+
         if (cursor.moveToFirst()) {
             do {
-                list.add(Product(
-                    id = cursor.getInt(cursor.getColumnIndexOrThrow("id")),
-                    name = cursor.getString(cursor.getColumnIndexOrThrow("name")),
-                    quantity = cursor.getInt(cursor.getColumnIndexOrThrow("quantity")),
-                    status = cursor.getString(cursor.getColumnIndexOrThrow("status")),
-                    imageUri = cursor.getString(cursor.getColumnIndexOrThrow("imageUri")),
-                    typ = cursor.getString(cursor.getColumnIndexOrThrow("typ")),
-                    pc = cursor.getInt(cursor.getColumnIndexOrThrow("pc")),
-                    des = cursor.getString(cursor.getColumnIndexOrThrow("des")),
-                    date = cursor.getString(cursor.getColumnIndexOrThrow("date")),
-
-                    ))
+                list.add(
+                    Product(
+                        id = cursor.getInt(cursor.getColumnIndexOrThrow("id")),
+                        name = cursor.getString(cursor.getColumnIndexOrThrow("name")),
+                        quantity = cursor.getInt(cursor.getColumnIndexOrThrow("quantity")),
+                        status = cursor.getString(cursor.getColumnIndexOrThrow("status")),
+                        imageUri = cursor.getString(cursor.getColumnIndexOrThrow("imageUri")),
+                        typ = cursor.getString(cursor.getColumnIndexOrThrow("typ")),
+                        pc = cursor.getInt(cursor.getColumnIndexOrThrow("pc")),
+                        des = cursor.getString(cursor.getColumnIndexOrThrow("des")),
+                        date = cursor.getString(cursor.getColumnIndexOrThrow("date"))
+                    )
+                )
             } while (cursor.moveToNext())
         }
+
         cursor.close()
         return list
     }
+
+
+    fun getLowStatusCount(): Int {
+        val db = readableDatabase
+        val cursor = db.rawQuery(
+            "SELECT COUNT(*) FROM products WHERE status = ?",
+            arrayOf("น้อย")
+        )
+
+        var count = 0
+        if (cursor.moveToFirst()) {
+            count = cursor.getInt(0)
+        }
+
+        cursor.close()
+        db.close()
+        return count
+    }
+
+    fun getOutStatusCount(): Int {
+        val db = readableDatabase
+        val cursor = db.rawQuery(
+            "SELECT COUNT(*) FROM products WHERE status = ?",
+            arrayOf("หมด")
+        )
+
+        var count = 0
+        if (cursor.moveToFirst()) {
+            count = cursor.getInt(0)
+        }
+
+        cursor.close()
+        db.close()
+        return count
+    }
+
+    fun getTotalProductCount(): Int {
+        val db = readableDatabase
+        val cursor = db.rawQuery(
+            "SELECT COUNT(*) FROM products",
+            null
+        )
+
+        var count = 0
+        if (cursor.moveToFirst()) {
+            count = cursor.getInt(0)
+        }
+
+        cursor.close()
+        db.close()
+        return count
+    }
+
+    fun getCurrentMonthTotal(): Int {
+        val db = readableDatabase
+
+        val monthFormat = java.text.SimpleDateFormat("MM", Locale.getDefault())
+        val yearFormat = java.text.SimpleDateFormat("yyyy", Locale.getDefault())
+
+        val month = monthFormat.format(Date())
+        val year = yearFormat.format(Date())
+
+        val cursor = db.rawQuery(
+            """
+        SELECT SUM(pc * quantity)
+        FROM products
+        WHERE strftime('%m', date) = ?
+          AND strftime('%Y', date) = ?
+        """,
+            arrayOf(month, year)
+        )
+
+        var total = 0
+        if (cursor.moveToFirst() && !cursor.isNull(0)) {
+            total = cursor.getInt(0)
+        }
+
+        cursor.close()
+        return total
+    }
+
+
 }

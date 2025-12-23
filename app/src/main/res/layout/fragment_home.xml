@@ -74,7 +74,7 @@
                 app:tint="#FF9800" />
 
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="20dp"
                 android:orientation="vertical"
@@ -107,7 +107,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="สต็อกเหลือน้อย"
+                    android:text="สต็อกน้อย"
                     android:textColor="#BFBFBF"
                     android:textSize="14sp" />
             </LinearLayout>
@@ -147,7 +147,7 @@
                 app:tint="#69C542" />
 
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="15dp"
                 android:orientation="vertical"
@@ -220,7 +220,7 @@
                 app:tint="#E91E1E" />
 
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="20dp"
                 android:orientation="vertical"
@@ -254,7 +254,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="สต็อกหมด"
-                    android:textColor="#FFFEFE"
+                    android:textColor="#BFBFBF"
                     android:textSize="14sp" />
             </LinearLayout>
 
@@ -286,7 +286,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="แนวโน้มยอดรวม 30 วัน"
+                android:text="แนวโน้มรายจ่ายรายปี"
                 android:textSize="20sp"
                 android:textColor="@color/black" />
 

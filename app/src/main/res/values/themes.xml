@@ -17,4 +17,9 @@
         <!--font-->
         <item name="android:fontFamily">@font/promptmedium</item>
     </style>
+
+    <style name="SpinnerPopupTheme">
+        <item name="android:textColor">@android:color/black</item>
+        <item name="android:background">@android:color/white</item>
+    </style>
 </resources>
