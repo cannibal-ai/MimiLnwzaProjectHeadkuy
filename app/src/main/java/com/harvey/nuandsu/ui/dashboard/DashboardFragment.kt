@@ -2,6 +2,8 @@ package com.harvey.nuandsu.ui.dashboard
 
 import DBHelper
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
@@ -14,6 +16,7 @@ import com.harvey.nuandsu.Product
 import com.harvey.nuandsu.ProductAdapter
 import com.harvey.nuandsu.databinding.FragmentDashboardBinding
 import com.harvey.nuandsu.ui.addproduct.AddProductDialogFragment
+import com.harvey.nuandsu.ui.editproduct.DeleteDialogFragment
 import com.harvey.nuandsu.ui.editproduct.EditDialogFragment
 
 class DashboardFragment : Fragment() {
@@ -50,7 +53,10 @@ class DashboardFragment : Fragment() {
 
 
         return binding.root
+
+
     }
+
 
 
     // ---------------- RecyclerView ----------------
@@ -58,19 +64,30 @@ class DashboardFragment : Fragment() {
         adapter = ProductAdapter(
             fullList.toMutableList(),
             onItemClick = { product -> },
+
             onEditClick = { product ->
-                val dialog = EditDialogFragment.newInstance(product)
-                dialog.show(parentFragmentManager, "EditProductDialog")
+                EditDialogFragment
+                    .newInstance(product)
+                    .show(parentFragmentManager, "EditProductDialog")
             },
+
             onDeleteClick = { product ->
-                db.deleteProduct(product.id)
-                refreshList()
-            }
+                DeleteDialogFragment
+                    .newInstance(product)
+                    .show(parentFragmentManager, "DeleteDialog")
+            },
+
+            fragmentManager = parentFragmentManager
         )
 
-        binding.recyclerViewProducts.layoutManager = LinearLayoutManager(requireContext())
+        binding.recyclerViewProducts.layoutManager =
+            LinearLayoutManager(requireContext())
         binding.recyclerViewProducts.adapter = adapter
     }
+
+
+
+
 
 
     // ---------------- Search ----------------
@@ -90,8 +107,7 @@ class DashboardFragment : Fragment() {
         binding.statusGroup.setOnCheckedChangeListener { _, checkedId ->
             when (checkedId) {
                 com.harvey.nuandsu.R.id.btnall -> filterByStatus("ทั้งหมด")
-                com.harvey.nuandsu.R.id.btnlow -> filterByStatus("น้อย")
-                com.harvey.nuandsu.R.id.btnout -> filterByStatus("หมด")
+                com.harvey.nuandsu.R.id.btnlow -> filterByStatus("ใกล้หมดอายุ")
             }
         }
     }

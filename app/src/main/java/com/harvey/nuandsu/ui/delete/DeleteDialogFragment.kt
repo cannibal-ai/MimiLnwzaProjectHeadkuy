@@ -47,7 +47,7 @@ class DeleteDialogFragment : DialogFragment() {
         btnConfirm.setOnClickListener {
             db.deleteProduct(product.id)
 
-            // แจ้งให้หน้า Dashboard refresh list
+
             (parentFragment as? DashboardFragment)?.let { dash ->
                 dash.refreshList()
             }
@@ -57,9 +57,9 @@ class DeleteDialogFragment : DialogFragment() {
                 Bundle()
             )
 
-            dismiss()               // ปิด popup ลบ
+            dismiss()
             parentFragmentManager.findFragmentByTag("EditProductDialog")?.let {
-                (it as DialogFragment).dismiss()  // ปิดหน้า Edit ด้วย
+                (it as DialogFragment).dismiss()
             }
         }
 

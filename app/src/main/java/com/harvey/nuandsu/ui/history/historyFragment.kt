@@ -16,6 +16,8 @@ import com.harvey.nuandsu.databinding.FragmentHistoryBinding
 
 class historyFragment : Fragment() {
 
+
+
     private var _binding: FragmentHistoryBinding? = null
     private val binding get() = _binding!!
 
@@ -35,7 +37,7 @@ class historyFragment : Fragment() {
                     image = R.drawable.images,
                     name = p.name,
                     time = p.date,
-                    new = if (index == 0) "ใหม่" else null
+                    new = if (index == 0) "ล่าสุด" else null
                 )
             )
         }

@@ -11,6 +11,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Spinner
+import android.widget.TextView
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.DialogFragment
@@ -24,10 +25,8 @@ import java.time.format.DateTimeFormatter
 class AddProductDialogFragment : DialogFragment() {
 
     val now = LocalDateTime.now()
-    val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
+    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
     val dateTimeNow = now.format(formatter)
-
-
 
 
     private var selectedImageUri: Uri? = null
@@ -36,15 +35,19 @@ class AddProductDialogFragment : DialogFragment() {
     private lateinit var db: DBHelper
 
     private lateinit var nameEt: EditText
-    private lateinit var qtyEt: EditText
     private lateinit var typeEt: Spinner
 
-    private lateinit var statusEt: EditText
+    private lateinit var priceEt: EditText
     private lateinit var descEt: EditText
 
     private lateinit var previewImage: ImageView
     private lateinit var chooseImageBtn: ImageView
     private lateinit var addBtn: Button
+
+    private lateinit var btnPlus: TextView
+    private lateinit var btnMinus: TextView
+    private lateinit var etAddQty: EditText
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -56,19 +59,34 @@ class AddProductDialogFragment : DialogFragment() {
         db = DBHelper(requireContext())
 
         nameEt = view.findViewById(R.id.etProductName)
-        qtyEt = view.findViewById(R.id.etMany)
         typeEt = view.findViewById(R.id.etType)
-        statusEt = view.findViewById(R.id.etPrice)
+        priceEt = view.findViewById(R.id.etPrice)
         descEt = view.findViewById(R.id.etDescription)
-
         chooseImageBtn = view.findViewById(R.id.btnChooseImage)
         previewImage = view.findViewById(R.id.imgPreview)
         addBtn = view.findViewById(R.id.btnAdd)
+        btnPlus = view.findViewById(R.id.btnPlus)
+        btnMinus = view.findViewById(R.id.btnMinus)
+        etAddQty = view.findViewById(R.id.etAddQty)
 
         chooseImageBtn.setOnClickListener {
             imagePickerLauncher.launch("image/*")
         }
 
+        var addQty = 0
+        etAddQty.setText("0")
+
+        btnPlus.setOnClickListener {
+            addQty++
+            etAddQty.setText(addQty.toString())
+        }
+
+        btnMinus.setOnClickListener {
+            if (addQty > 0) {
+                addQty--
+                etAddQty.setText(addQty.toString())
+            }
+        }
 
 
 
@@ -80,25 +98,47 @@ class AddProductDialogFragment : DialogFragment() {
                 return@setOnClickListener
             }
 
-            val qty = qtyEt.text.toString().toIntOrNull() ?: 0
-            val status = when {
-                qty == 0 -> "หมด"
-                qty < 10 -> "น้อย"
-                else -> null
+            val price = priceEt.text.toString().toIntOrNull() ?: 0
+            val qty = etAddQty.text.toString().toIntOrNull() ?: 0
+
+            if (price == null || price <= 0) {
+                priceEt.error = "กรุณากรอกราคาสินค้า"
+                priceEt.requestFocus()
+                return@setOnClickListener
             }
-            val desc = descEt.text.toString()
+
+            val total = price * qty
             val date = java.time.LocalDate.now().toString()
+            val expiry = try {
+                java.time.LocalDate.parse(date)
+            } catch (e: Exception) {
+                java.time.LocalDate.now().plusDays(30)
+            }
+
+            val lastUpdate = java.time.LocalDate.now()
+
+            val status = when {
+                java.time.LocalDate.now().isAfter(expiry.minusDays(3)) -> "ใกล้หมดอายุ"
+                java.time.LocalDate.now().isAfter(lastUpdate.plusDays(7)) -> "ใกล้หมดอายุ"
+                else -> "ปกติ"
+            }
+
+
+            val desc = descEt.text.toString()
+
 
 
 
             val newId = db.insertProduct(
                 Product(
                     name = name,
+                    pc = price,
                     quantity = qty,
                     status = status,
                     imageUri = selectedImageUri?.toString(),
                     typ = type,
                     des = desc,
+                    totalCost = total,
                     date = dateTimeNow
                 )
             ).toInt()
@@ -109,10 +149,12 @@ class AddProductDialogFragment : DialogFragment() {
             val newProduct = Product(
                 id = newId,
                 name = name,
+                pc = price,
                 quantity = qty,
                 status = status,
                 imageUri = selectedImageUri?.toString(),
                 typ = type,
+                totalCost = total,
                 des = desc,
             )
 
@@ -157,7 +199,6 @@ class AddProductDialogFragment : DialogFragment() {
             }
         }
 
-        // คลิกเพื่อเลือกรูป
         chooseImageBtn.setOnClickListener {
             imagePickerLauncher.launch("image/*")
         }

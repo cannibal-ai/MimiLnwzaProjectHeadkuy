@@ -33,6 +33,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="15dp"
         android:layout_marginEnd="15dp"
+        android:layout_marginTop="10dp"
         android:background="@drawable/add"
         android:drawableStart="@android:drawable/ic_menu_search"
         android:elevation="4dp"
@@ -81,18 +82,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/black"
-            android:text="เหลือน้อย"
+            android:text="ใกล้หมดอายุ"
             android:buttonTint="#6C4F35"/>/>
 
-        <RadioButton
-            android:id="@+id/btnout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textColor="@color/black"
-            android:text="หมด"
-            android:buttonTint="#6C4F35"
-
-            />
 
     </RadioGroup>
 

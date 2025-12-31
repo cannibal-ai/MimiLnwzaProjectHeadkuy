@@ -12,11 +12,13 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Spinner
+import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.DialogFragment
 import com.bumptech.glide.Glide
 import com.harvey.nuandsu.Product
 import com.harvey.nuandsu.R
+import org.w3c.dom.Text
 
 
 class EditDialogFragment : DialogFragment() {
@@ -52,13 +54,27 @@ class EditDialogFragment : DialogFragment() {
         db = DBHelper(requireContext())
     }
 
-    private fun getStatus(qty: Int): String? {
+    private fun getUpdatedStatus(product: Product, qty: Int): String {
+        val today = java.time.LocalDate.now()
+        val expiry = try {
+            java.time.LocalDate.parse(product.expiryDate)
+        } catch (e: Exception) {
+            today.plusDays(30)
+        }
+
+        val lastUpdate = try {
+            java.time.LocalDate.parse(product.lastUpdateDate)
+        } catch (e: Exception) {
+            today
+        }
+
         return when {
-            qty == 0 -> "หมด"
-            qty in 1..9 -> "น้อย"
-            else -> null
+            today.isAfter(expiry.minusDays(3)) -> "ใกล้หมดอายุ"
+            today.isAfter(lastUpdate.plusDays(7)) -> "ใกล้หมดอายุ"
+            else -> "ปกติ"
         }
     }
+
 
 
     override fun onCreateView(
@@ -69,13 +85,31 @@ class EditDialogFragment : DialogFragment() {
         val view = inflater.inflate(R.layout.fragment_edit, container, false)
 
         val name = view.findViewById<EditText>(R.id.edtName)
-        val price = view.findViewById<EditText>(R.id.etPriceEdit)   // ราคา
+        val price = view.findViewById<EditText>(R.id.etPriceEdit)
         val type = view.findViewById<Spinner>(R.id.etTypeEdit)
-        val qty = view.findViewById<EditText>(R.id.edtQuantity)
         val detail = view.findViewById<EditText>(R.id.etDescriptionEdit)
         imgEdit = view.findViewById(R.id.imgFoodEdit)
         val save = view.findViewById<Button>(R.id.btnAddEdit)
-        val delete = view.findViewById<Button>(R.id.btnDelete)
+        val Plus = view.findViewById<TextView>(R.id.P)
+        val Minus = view.findViewById<TextView>(R.id.M)
+        val Add = view.findViewById<EditText>(R.id.A)
+
+        var addQty = 0
+        Add.setText("0")
+
+
+        Plus.setOnClickListener {
+            addQty++
+            Add.setText(addQty.toString())
+        }
+
+        Minus.setOnClickListener {
+            if (addQty > 0) {
+                addQty--
+                Add.setText(addQty.toString())
+            }
+        }
+
 
 
         val adapter = ArrayAdapter.createFromResource(
@@ -96,7 +130,6 @@ class EditDialogFragment : DialogFragment() {
             type.setSelection(index)
         }
 
-        qty.setText(product.quantity.toString())
         detail.setText(product.des)
 
         if (!product.imageUri.isNullOrEmpty()) {
@@ -109,24 +142,23 @@ class EditDialogFragment : DialogFragment() {
             imagePickerLauncher.launch(intent)
         }
 
-        delete.setOnClickListener {
-            val dialog = DeleteDialogFragment.newInstance(product)
-            dialog.show(parentFragmentManager, "DeleteDialog")
-        }
 
         save.setOnClickListener {
 
-            val newQty = qty.text.toString().toIntOrNull() ?: 0
-            val newStatus = getStatus(newQty)
+            val add = Add.text.toString().toIntOrNull() ?: 0
+
+            val newQuantity = product.quantity + add
+            val newTotalCost = product.totalCost + (add * product.pc)
 
             val updatedProduct = product.copy(
                 name = name.text.toString(),
                 pc = price.text.toString().toInt(),
                 typ = type.selectedItem.toString(),
-                quantity = newQty,
-                status = newStatus,
                 des = detail.text.toString(),
-                imageUri = product.imageUri
+                quantity = newQuantity,
+                totalCost = newTotalCost,
+                status = getUpdatedStatus(product, newQuantity),
+                lastUpdateDate = java.time.LocalDate.now().toString()
             )
 
             db.updateProduct(updatedProduct)
@@ -138,9 +170,6 @@ class EditDialogFragment : DialogFragment() {
 
             dismiss()
         }
-
-
-
 
         return view
     }

@@ -68,7 +68,7 @@
 
             <TextView
                 android:id="@+id/newbie"
-                android:layout_width="45dp"
+                android:layout_width="match_parent"
                 android:layout_height="30dp"
                 android:gravity="center"
                 android:text="ใหม่"

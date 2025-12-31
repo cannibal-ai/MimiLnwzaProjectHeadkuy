@@ -19,7 +19,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
             android:layout_marginTop="60dp"
-            android:text="@string/watudip"
+            android:text="ยอดรวมการเงิน"
             android:textColor="#6C4F35"
             android:textSize="40sp"
             android:textStyle="bold"  />
@@ -209,7 +209,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="ส่วนต่างจากเดือนก่อน"
+                android:text="ส่วนต่างจากวันก่อน"
                 android:textColor="#333333"
                 android:textSize="14sp" />
 

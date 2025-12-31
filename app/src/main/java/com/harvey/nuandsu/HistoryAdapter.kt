@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.harvey.nuandsu.ui.history.historyFragment
 
 class HistoryAdapter(
+
     private var historyList: List<ProductHis>,
     private val onItemClick: (ProductHis) -> Unit
 ) : RecyclerView.Adapter<HistoryAdapter.HistoryViewHolder>() {

@@ -6,12 +6,11 @@ import com.harvey.nuandsu.Product
 import java.util.Date
 import java.util.Locale
 
-class DBHelper(context: Context) : SQLiteOpenHelper(context, "MyDB.db", null, 1) {
+class DBHelper(context: Context) : SQLiteOpenHelper(context, "MyDB.db", null, 2) {
 
 
 
     override fun onCreate(db: SQLiteDatabase) {
-        // สร้างตาราง products
         db.execSQL(
             "CREATE TABLE products (" +
                     "id INTEGER PRIMARY KEY AUTOINCREMENT," +
@@ -21,6 +20,7 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "MyDB.db", null, 1)
                     "imageUri TEXT," +
                     "typ TEXT," +
                     "pc INTEGER," +
+                    "totalCost INTEGER," +
                     "des TEXT," +
                     "date TEXT)"
         )
@@ -42,7 +42,8 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "MyDB.db", null, 1)
         cv.put("typ", product.typ)
         cv.put("pc", product.pc)
         cv.put("des", product.des)
-        cv.put("date", product.date)
+        cv.put("totalCost", product.totalCost)
+        cv.put("date", java.text.SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date()))
         return db.insert("products", null, cv)
     }
 
@@ -55,26 +56,27 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "MyDB.db", null, 1)
 
     fun updateProduct(product: Product): Int {
         val db = writableDatabase
-        val values = ContentValues().apply {
-            put("name", product.name)
-            put("quantity", product.quantity)
-            put("status", product.status)
-            put("imageUri", product.imageUri)
-            put("typ", product.typ)
-            put("des", product.des)
-            put("date", product.date)
-            put("pc", product.pc)
+        val cv = ContentValues()
 
-        }
+        cv.put("name", product.name)
+        cv.put("quantity", product.quantity)
+        cv.put("status", product.status)
+        cv.put("imageUri", product.imageUri)
+        cv.put("typ", product.typ)
+        cv.put("pc", product.pc)
+        cv.put("des", product.des)
+        cv.put("totalCost", product.totalCost)
+        cv.put("date", java.text.SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date()))
 
         return db.update(
             "products",
-
-            values,
+            cv,
             "id = ?",
             arrayOf(product.id.toString())
         )
     }
+
+
 
 
     fun getAllProducts(): List<Product> {
@@ -92,12 +94,13 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "MyDB.db", null, 1)
                     Product(
                         id = cursor.getInt(cursor.getColumnIndexOrThrow("id")),
                         name = cursor.getString(cursor.getColumnIndexOrThrow("name")),
+                        pc = cursor.getInt(cursor.getColumnIndexOrThrow("pc")),
                         quantity = cursor.getInt(cursor.getColumnIndexOrThrow("quantity")),
                         status = cursor.getString(cursor.getColumnIndexOrThrow("status")),
                         imageUri = cursor.getString(cursor.getColumnIndexOrThrow("imageUri")),
                         typ = cursor.getString(cursor.getColumnIndexOrThrow("typ")),
-                        pc = cursor.getInt(cursor.getColumnIndexOrThrow("pc")),
                         des = cursor.getString(cursor.getColumnIndexOrThrow("des")),
+                        totalCost = cursor.getInt(cursor.getColumnIndexOrThrow("totalCost")),
                         date = cursor.getString(cursor.getColumnIndexOrThrow("date"))
                     )
                 )
@@ -107,6 +110,7 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "MyDB.db", null, 1)
         cursor.close()
         return list
     }
+
 
 
     fun getLowStatusCount(): Int {
@@ -126,23 +130,7 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "MyDB.db", null, 1)
         return count
     }
 
-    fun getOutStatusCount(): Int {
-        val db = readableDatabase
-        val cursor = db.rawQuery(
-            "SELECT COUNT(*) FROM products WHERE status = ?",
-            arrayOf("หมด")
-        )
-
-        var count = 0
-        if (cursor.moveToFirst()) {
-            count = cursor.getInt(0)
-        }
-
-        cursor.close()
-        db.close()
-        return count
-    }
-
+    //วัตถุดิบทั้งหมด
     fun getTotalProductCount(): Int {
         val db = readableDatabase
         val cursor = db.rawQuery(
@@ -160,31 +148,61 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "MyDB.db", null, 1)
         return count
     }
 
-    fun getCurrentMonthTotal(): Int {
+    //เดือนนี้
+    fun getTotalSpent(): Int {
         val db = readableDatabase
-
-        val monthFormat = java.text.SimpleDateFormat("MM", Locale.getDefault())
-        val yearFormat = java.text.SimpleDateFormat("yyyy", Locale.getDefault())
-
-        val month = monthFormat.format(Date())
-        val year = yearFormat.format(Date())
-
         val cursor = db.rawQuery(
-            """
-        SELECT SUM(pc * quantity)
-        FROM products
-        WHERE strftime('%m', date) = ?
-          AND strftime('%Y', date) = ?
-        """,
-            arrayOf(month, year)
+            "SELECT SUM(totalCost) FROM products",
+            null
         )
 
         var total = 0
         if (cursor.moveToFirst() && !cursor.isNull(0)) {
             total = cursor.getInt(0)
         }
-
         cursor.close()
+        db.close()
+        return total
+    }
+
+    // วันนี้
+    fun getTotalSpentToday(): Int {
+        val db = readableDatabase
+        val cursor = db.rawQuery(
+            """
+        SELECT SUM(totalCost)
+        FROM products
+        WHERE date(date) = date('now', 'localtime')
+        """,
+            null
+        )
+
+        val total = if (cursor.moveToFirst() && !cursor.isNull(0)) {
+            cursor.getInt(0)
+        } else 0
+        cursor.close()
+        db.close()
+        return total
+    }
+
+
+    // เมื่อวาน
+    fun getTotalSpentYesterday(): Int {
+        val db = readableDatabase
+        val cursor = db.rawQuery(
+            """
+        SELECT SUM(totalCost)
+        FROM products
+        WHERE date(date) = date('now', '-1 day', 'localtime')
+        """,
+            null
+        )
+
+        val total = if (cursor.moveToFirst() && !cursor.isNull(0)) {
+            cursor.getInt(0)
+        } else 0
+        cursor.close()
+        db.close()
         return total
     }
 

@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.harvey.nuandsu.R
 import com.harvey.nuandsu.databinding.FragmentNotificationsBinding
 import java.util.Locale
 
@@ -49,15 +50,20 @@ class NotificationsFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-
         val dbHelper = DBHelper(requireContext())
-        val total = dbHelper.getCurrentMonthTotal()
+        val total = dbHelper.getTotalSpent()
+        val todayTotal = dbHelper.getTotalSpentToday()
+        val yesterdayTotal = dbHelper.getTotalSpentYesterday()
+        val diff = todayTotal - yesterdayTotal
 
         binding.textViewMonthlyAmount.text = "%,d".format(total)
+        binding.textViewTodayAmount.text = "%,d".format(todayTotal)
+        binding.textViewDifferenceAmount.text = if(diff >= 0) "+%,d".format(diff) else "%,d".format(diff)
+
+        val color = if (diff >= 0) R.color.red_light else R.color.green_light
+        binding.textViewDifferenceAmount.setTextColor(resources.getColor(color, null))
+        binding.cardviewDifference.setCardBackgroundColor(resources.getColor(color, null))
     }
-
-
-
 
     override fun onDestroyView() {
         super.onDestroyView()
