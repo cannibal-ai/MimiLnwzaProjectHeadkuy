@@ -1,8 +1,7 @@
 package com.harvey.nuandsu.ui.editproduct
 
-import DBHelper
-import android.app.Activity
-import android.content.Intent
+import com.harvey.nuandsu.DBHelper
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -13,30 +12,32 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Spinner
 import android.widget.TextView
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.DialogFragment
 import com.bumptech.glide.Glide
 import com.harvey.nuandsu.Product
 import com.harvey.nuandsu.R
-import org.w3c.dom.Text
-
+import com.harvey.nuandsu.ui.dashboard.DashboardFragment
 
 class EditDialogFragment : DialogFragment() {
 
     private lateinit var product: Product
     private lateinit var db: DBHelper
-    private lateinit var imgEdit: ImageView
 
-    private val imagePickerLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                val uri = result.data?.data
-                if (uri != null) {
-                    product = product.copy(imageUri = uri.toString())
-                    Glide.with(requireContext()).load(uri).into(imgEdit)
-                }
-            }
-        }
+    private lateinit var nameEt: EditText
+    private lateinit var typeEt: Spinner
+    private lateinit var priceEt: EditText
+    private lateinit var descEt: EditText
+    private lateinit var qtyEt: EditText
+    private lateinit var previewImage: ImageView
+    private lateinit var updateBtn: Button
+    
+    private lateinit var btnPlus: TextView
+    private lateinit var btnMinus: TextView
+
+    private var selectedImageUri: Uri? = null
+    private lateinit var imagePickerLauncher: ActivityResultLauncher<String>
 
     companion object {
         fun newInstance(product: Product): EditDialogFragment {
@@ -54,120 +55,89 @@ class EditDialogFragment : DialogFragment() {
         db = DBHelper(requireContext())
     }
 
-    private fun getUpdatedStatus(product: Product, qty: Int): String {
-        val today = java.time.LocalDate.now()
-        val expiry = try {
-            java.time.LocalDate.parse(product.expiryDate)
-        } catch (e: Exception) {
-            today.plusDays(30)
-        }
-
-        val lastUpdate = try {
-            java.time.LocalDate.parse(product.lastUpdateDate)
-        } catch (e: Exception) {
-            today
-        }
-
-        return when {
-            today.isAfter(expiry.minusDays(3)) -> "ใกล้หมดอายุ"
-            today.isAfter(lastUpdate.plusDays(7)) -> "ใกล้หมดอายุ"
-            else -> "ปกติ"
-        }
-    }
-
-
-
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
+        inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_edit, container, false)
 
-        val name = view.findViewById<EditText>(R.id.edtName)
-        val price = view.findViewById<EditText>(R.id.etPriceEdit)
-        val type = view.findViewById<Spinner>(R.id.etTypeEdit)
-        val detail = view.findViewById<EditText>(R.id.etDescriptionEdit)
-        imgEdit = view.findViewById(R.id.imgFoodEdit)
-        val save = view.findViewById<Button>(R.id.btnAddEdit)
-        val Plus = view.findViewById<TextView>(R.id.P)
-        val Minus = view.findViewById<TextView>(R.id.M)
-        val Add = view.findViewById<EditText>(R.id.A)
+        nameEt = view.findViewById(R.id.edtName)
+        typeEt = view.findViewById(R.id.etTypeEdit)
+        priceEt = view.findViewById(R.id.etPriceEdit)
+        descEt = view.findViewById(R.id.etDescriptionEdit)
+        qtyEt = view.findViewById(R.id.A)
+        previewImage = view.findViewById(R.id.imgFoodEdit)
+        updateBtn = view.findViewById(R.id.btnAddEdit)
+        btnPlus = view.findViewById(R.id.P)
+        btnMinus = view.findViewById(R.id.M)
 
-        var addQty = 0
-        Add.setText("0")
+        nameEt.setText(product.name)
+        priceEt.setText(product.pc.toString())
+        qtyEt.setText("0") 
+        descEt.setText(product.des)
 
-
-        Plus.setOnClickListener {
-            addQty++
-            Add.setText(addQty.toString())
+        if (!product.imageUri.isNullOrEmpty()) {
+            Glide.with(this)
+                .load(product.imageUri)
+                .centerCrop()
+                .into(previewImage)
         }
 
-        Minus.setOnClickListener {
-            if (addQty > 0) {
-                addQty--
-                Add.setText(addQty.toString())
+        val typeArray = resources.getStringArray(R.array.product_types_filter)
+        val adapter = ArrayAdapter(requireContext(), R.layout.spinner_item, typeArray)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        typeEt.adapter = adapter
+        val typeIndex = typeArray.indexOf(product.typ)
+        if (typeIndex >= 0) typeEt.setSelection(typeIndex)
+
+        btnPlus.setOnClickListener {
+            val currentQty = qtyEt.text.toString().toIntOrNull() ?: 0
+            qtyEt.setText((currentQty + 1).toString())
+        }
+        btnMinus.setOnClickListener {
+            val currentQty = qtyEt.text.toString().toIntOrNull() ?: 0
+            qtyEt.setText((currentQty - 1).toString())
+        }
+
+        imagePickerLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+            if (uri != null) {
+                selectedImageUri = uri
+                Glide.with(this)
+                    .load(uri)
+                    .centerCrop()
+                    .into(previewImage)
             }
         }
 
-
-
-        val adapter = ArrayAdapter.createFromResource(
-            requireContext(),
-            R.array.product_types_filter,
-            R.layout.spinner_itemhe
-        )
-        adapter.setDropDownViewResource(
-            android.R.layout.simple_spinner_dropdown_item
-        )
-        type.adapter = adapter
-
-
-        name.setText(product.name)
-        price.setText(product.pc.toString())
-        val index = adapter.getPosition(product.typ)
-        if (index >= 0) {
-            type.setSelection(index)
+        previewImage.setOnClickListener {
+            imagePickerLauncher.launch("image/*")
         }
 
-        detail.setText(product.des)
-
-        if (!product.imageUri.isNullOrEmpty()) {
-            Glide.with(requireContext()).load(product.imageUri).into(imgEdit)
-        }
-
-        imgEdit.setOnClickListener {
-            val intent = Intent(Intent.ACTION_PICK)
-            intent.type = "image/*"
-            imagePickerLauncher.launch(intent)
-        }
-
-
-        save.setOnClickListener {
-
-            val add = Add.text.toString().toIntOrNull() ?: 0
-
-            val newQuantity = product.quantity + add
-            val newTotalCost = product.totalCost + (add * product.pc)
+        updateBtn.setOnClickListener {
+            val addQty = qtyEt.text.toString().toIntOrNull() ?: 0
+            val newPrice = priceEt.text.toString().toIntOrNull() ?: 0
+            
+            // คำนวณจำนวนรวมใหม่
+            val finalQuantity = product.quantity + addQty
+            val safeQuantity = if (finalQuantity < 0) 0 else finalQuantity
+            
+            // *** คำนวณราคารวมใหม่ (สำคัญมาก) ***
+            val newTotalCost = newPrice * safeQuantity
 
             val updatedProduct = product.copy(
-                name = name.text.toString(),
-                pc = price.text.toString().toInt(),
-                typ = type.selectedItem.toString(),
-                des = detail.text.toString(),
-                quantity = newQuantity,
-                totalCost = newTotalCost,
-                status = getUpdatedStatus(product, newQuantity),
-                lastUpdateDate = java.time.LocalDate.now().toString()
+                name = nameEt.text.toString(),
+                pc = newPrice,
+                quantity = safeQuantity,
+                totalCost = newTotalCost, // อัปเดตราคารวมที่นี่
+                des = descEt.text.toString(),
+                typ = typeEt.selectedItem.toString(),
+                imageUri = selectedImageUri?.toString() ?: product.imageUri
             )
 
             db.updateProduct(updatedProduct)
 
-            parentFragmentManager.setFragmentResult(
-                "product_changed",
-                Bundle()
-            )
-
+            (parentFragment as? DashboardFragment)?.refreshList()
+            parentFragmentManager.setFragmentResult("product_changed", Bundle())
             dismiss()
         }
 

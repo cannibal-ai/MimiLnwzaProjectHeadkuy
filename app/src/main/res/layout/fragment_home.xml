@@ -154,7 +154,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="สต๊อกหมดอายุ"
+                    android:text="ใกล้หมดอายุ"
                     android:textColor="#5c5c5c"
                     android:textSize="14sp" />
             </LinearLayout>
@@ -256,7 +256,7 @@
             android:id="@+id/lineChart"
             android:layout_marginTop="10dp"
             android:layout_width="match_parent"
-            android:layout_height="250dp"/>
+            android:layout_height="180dp"/>
     </LinearLayout>
 
     <LinearLayout
@@ -270,7 +270,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="วัตถุดิบล่าสุด  ⏰️"
+            android:text="รายการล่าสุด  ⏰️"
             android:textSize="20sp"
             android:textColor="@color/black" />
 

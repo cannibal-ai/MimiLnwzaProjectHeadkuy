@@ -12,6 +12,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.harvey.nuandsu.ui.editproduct.DeleteDialogFragment
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 
 class ProductAdapter(
 
@@ -21,6 +23,7 @@ class ProductAdapter(
     private val onDeleteClick: (Product) -> Unit,
     private val fragmentManager: FragmentManager
 
+
 ) : RecyclerView.Adapter<ProductAdapter.ViewHolder>() {
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -29,6 +32,9 @@ class ProductAdapter(
         val btnEdit: LinearLayout = itemView.findViewById(R.id.btnEdit)
         val btnDelete: ImageView = itemView.findViewById(R.id.btnDelete)
         val img: ImageView = itemView.findViewById(R.id.imgIngredient)
+
+        val txtTotal: TextView = itemView.findViewById(R.id.txttotal)
+
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -42,19 +48,33 @@ class ProductAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val product = productList[position]
 
-
-        val displayStatus = getDisplayStatus(product)
-
         holder.name.text = product.name
-        holder.status.text = displayStatus
+        holder.txtTotal.text = product.pc.toString()
 
         Glide.with(holder.itemView.context)
             .load(product.imageUri)
             .into(holder.img)
 
-        holder.status.setTextColor(
-            if (displayStatus == "ใกล้หมดอายุ") Color.parseColor("#FFA726") else Color.parseColor("#31653d")
-        )
+        // คำนวณสถานะจากวันที่เพิ่มสินค้า (product.date)
+        try {
+            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+            val addedDate = LocalDate.parse(product.date.substring(0, 10)) 
+            val today = LocalDate.now()
+            val diffDays = ChronoUnit.DAYS.between(addedDate, today)
+
+            when {
+                diffDays >= 7L -> {
+                    // กำหนดให้เป็น 7 วันตามต้องการ
+                    holder.status.text = "ใกล้หมดอายุ"
+                    holder.status.setTextColor(Color.parseColor("#FFA726"))
+                }
+                else -> {
+                    holder.status.text = ""
+                }
+            }
+        } catch (e: Exception) {
+            holder.status.text = ""
+        }
 
         holder.itemView.setOnClickListener { onItemClick(product) }
         holder.btnEdit.setOnClickListener { onEditClick(product) }
@@ -94,26 +114,6 @@ class ProductAdapter(
         if (index >= 0) {
             productList[index] = updatedProduct
             notifyItemChanged(index)
-        }
-    }
-
-    private fun getDisplayStatus(product: Product): String {
-        val today = LocalDate.now()
-        val expiry = try {
-            LocalDate.parse(product.expiryDate)
-        } catch (e: Exception) {
-            today.plusDays(30)
-        }
-        val lastUpdate = try {
-            LocalDate.parse(product.lastUpdateDate)
-        } catch (e: Exception) {
-            today
-        }
-
-        return when {
-            today.isAfter(expiry.minusDays(3)) -> "ใกล้หมดอายุ"
-            today.isAfter(lastUpdate.plusDays(7)) -> "ใกล้หมดอายุ"
-            else -> "ปกติ"
         }
     }
 }

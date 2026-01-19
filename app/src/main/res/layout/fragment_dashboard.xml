@@ -59,32 +59,34 @@
 
     <RadioGroup
         android:id="@+id/status_group"
-        android:layout_width="250dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
         android:layout_marginTop="15dp"
+        android:layout_marginEnd="10dp"
         android:orientation="horizontal"
+        app:layout_constraintEnd_toStartOf="@+id/planets_spinner"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/Search">
 
 
-    <RadioButton
+         <RadioButton
             android:id="@+id/btnall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="ทั้งหมด"
             android:textColor="@color/black"
             android:checked="true"
-            android:buttonTint="#6C4F35"/>/>
+            android:buttonTint="#6C4F35"/>
 
         <RadioButton
             android:id="@+id/btnlow"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/black"
+            android:layout_marginStart="10dp"
             android:text="ใกล้หมดอายุ"
-            android:buttonTint="#6C4F35"/>/>
-
+            android:buttonTint="#6C4F35"/>
 
     </RadioGroup>
 
@@ -131,7 +133,7 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewProducts"
         android:layout_width="match_parent"
-        android:layout_height="450dp"
+        android:layout_height="390dp"
         android:layout_marginStart="6dp"
         android:layout_marginTop="335dp"
         android:layout_marginEnd="6dp"

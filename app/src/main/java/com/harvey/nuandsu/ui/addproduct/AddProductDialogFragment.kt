@@ -1,6 +1,6 @@
 package com.harvey.nuandsu.ui.addproduct
 
-import DBHelper
+import com.harvey.nuandsu.DBHelper
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -15,18 +15,22 @@ import android.widget.TextView
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.DialogFragment
+import com.bumptech.glide.Glide
 import com.harvey.nuandsu.Product
+import com.harvey.nuandsu.ProductHis
 import com.harvey.nuandsu.R
 import com.harvey.nuandsu.ui.dashboard.DashboardFragment
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 
 
 class AddProductDialogFragment : DialogFragment() {
 
-    val now = LocalDateTime.now()
-    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
-    val dateTimeNow = now.format(formatter)
+    private val now = LocalDateTime.now()
+    private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+    private val dateTimeNow = now.format(formatter)
 
 
     private var selectedImageUri: Uri? = null
@@ -41,8 +45,8 @@ class AddProductDialogFragment : DialogFragment() {
     private lateinit var descEt: EditText
 
     private lateinit var previewImage: ImageView
-    private lateinit var chooseImageBtn: ImageView
     private lateinit var addBtn: Button
+
 
     private lateinit var btnPlus: TextView
     private lateinit var btnMinus: TextView
@@ -62,38 +66,44 @@ class AddProductDialogFragment : DialogFragment() {
         typeEt = view.findViewById(R.id.etType)
         priceEt = view.findViewById(R.id.etPrice)
         descEt = view.findViewById(R.id.etDescription)
-        chooseImageBtn = view.findViewById(R.id.btnChooseImage)
         previewImage = view.findViewById(R.id.imgPreview)
         addBtn = view.findViewById(R.id.btnAdd)
         btnPlus = view.findViewById(R.id.btnPlus)
         btnMinus = view.findViewById(R.id.btnMinus)
         etAddQty = view.findViewById(R.id.etAddQty)
 
-        chooseImageBtn.setOnClickListener {
-            imagePickerLauncher.launch("image/*")
-        }
-
-        var addQty = 0
-        etAddQty.setText("0")
-
-        btnPlus.setOnClickListener {
-            addQty++
-            etAddQty.setText(addQty.toString())
-        }
-
-        btnMinus.setOnClickListener {
-            if (addQty > 0) {
-                addQty--
-                etAddQty.setText(addQty.toString())
+        imagePickerLauncher = registerForActivityResult(
+            ActivityResultContracts.GetContent()
+        ) { uri ->
+            if (uri != null) {
+                selectedImageUri = uri
+                Glide.with(this)
+                    .load(uri)
+                    .centerCrop()
+                    .into(previewImage)
             }
         }
 
+        previewImage.setOnClickListener {
+            imagePickerLauncher.launch("image/*")
+        }
 
+        btnPlus.setOnClickListener {
+            val currentQty = etAddQty.text.toString().toIntOrNull() ?: 0
+            etAddQty.setText((currentQty + 1).toString())
+        }
+
+        btnMinus.setOnClickListener {
+            val currentQty = etAddQty.text.toString().toIntOrNull() ?: 0
+            if (currentQty > 0) {
+                etAddQty.setText((currentQty - 1).toString())
+            }
+        }
 
         addBtn.setOnClickListener {
             val name = nameEt.text.toString()
             val type = typeEt.selectedItem.toString()
-            if (type == "เลือกประเภท") {
+            if (type.contains("เลือกประเภท")) {
                 typeEt.requestFocus()
                 return@setOnClickListener
             }
@@ -101,33 +111,21 @@ class AddProductDialogFragment : DialogFragment() {
             val price = priceEt.text.toString().toIntOrNull() ?: 0
             val qty = etAddQty.text.toString().toIntOrNull() ?: 0
 
-            if (price == null || price <= 0) {
+            if (price <= 0) {
                 priceEt.error = "กรุณากรอกราคาสินค้า"
                 priceEt.requestFocus()
                 return@setOnClickListener
             }
 
             val total = price * qty
-            val date = java.time.LocalDate.now().toString()
-            val expiry = try {
-                java.time.LocalDate.parse(date)
-            } catch (e: Exception) {
-                java.time.LocalDate.now().plusDays(30)
-            }
+            
+            // ตั้งค่าสถานะเริ่มต้น (วันนี้ = ปกติ)
+            val today = LocalDate.now()
+            val expiry = today.plusDays(1) 
 
-            val lastUpdate = java.time.LocalDate.now()
-
-            val status = when {
-                java.time.LocalDate.now().isAfter(expiry.minusDays(3)) -> "ใกล้หมดอายุ"
-                java.time.LocalDate.now().isAfter(lastUpdate.plusDays(7)) -> "ใกล้หมดอายุ"
-                else -> "ปกติ"
-            }
-
+            val status = if (today.isBefore(expiry)) "ปกติ" else "ใกล้หมดอายุ"
 
             val desc = descEt.text.toString()
-
-
-
 
             val newId = db.insertProduct(
                 Product(
@@ -143,65 +141,28 @@ class AddProductDialogFragment : DialogFragment() {
                 )
             ).toInt()
 
-
-
-
-            val newProduct = Product(
-                id = newId,
-                name = name,
-                pc = price,
-                quantity = qty,
-                status = status,
-                imageUri = selectedImageUri?.toString(),
-                typ = type,
-                totalCost = total,
-                des = desc,
+            db.insertHistory(
+                ProductHis(
+                    name = name,
+                    time = dateTimeNow,
+                    new = null,
+                    imageUri = selectedImageUri?.toString()
+                )
             )
 
-
-            (parentFragment as? DashboardFragment)?.adapter?.addProduct(newProduct)
-
-            parentFragmentManager.setFragmentResult(
-                "product_changed",
-                Bundle()
-            )
+            (parentFragment as? DashboardFragment)?.refreshList()
+            parentFragmentManager.setFragmentResult("product_changed", Bundle())
             dismiss()
         }
+
         val adapter = ArrayAdapter.createFromResource(
             requireContext(),
             R.array.product_types_filter,
             R.layout.spinner_item
         )
-
-        adapter.setDropDownViewResource(
-            android.R.layout.simple_spinner_dropdown_item
-        )
-
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         typeEt.adapter = adapter
-
 
         return view
     }
-
-
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        imagePickerLauncher = registerForActivityResult(
-            ActivityResultContracts.GetContent()
-        ) { uri ->
-            if (uri != null) {
-
-                selectedImageUri = uri
-                chooseImageBtn.visibility = View.VISIBLE
-                chooseImageBtn.setImageURI(uri)
-                chooseImageBtn.setImageURI(uri)
-            }
-        }
-
-        chooseImageBtn.setOnClickListener {
-            imagePickerLauncher.launch("image/*")
-        }
-    }
-
 }

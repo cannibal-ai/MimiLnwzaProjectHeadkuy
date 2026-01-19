@@ -1,9 +1,7 @@
 package com.harvey.nuandsu.ui.dashboard
 
-import DBHelper
+import com.harvey.nuandsu.DBHelper
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
@@ -18,6 +16,8 @@ import com.harvey.nuandsu.databinding.FragmentDashboardBinding
 import com.harvey.nuandsu.ui.addproduct.AddProductDialogFragment
 import com.harvey.nuandsu.ui.editproduct.DeleteDialogFragment
 import com.harvey.nuandsu.ui.editproduct.EditDialogFragment
+import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 
 class DashboardFragment : Fragment() {
 
@@ -27,7 +27,8 @@ class DashboardFragment : Fragment() {
 
     private var _binding: FragmentDashboardBinding? = null
     private val binding get() = _binding!!
-
+    
+    private var isFirstLoad = true
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -51,32 +52,23 @@ class DashboardFragment : Fragment() {
             refreshList()
         }
 
-
         return binding.root
-
-
     }
 
-
-
-    // ---------------- RecyclerView ----------------
     private fun setupRecyclerView() {
         adapter = ProductAdapter(
             fullList.toMutableList(),
             onItemClick = { product -> },
-
             onEditClick = { product ->
                 EditDialogFragment
                     .newInstance(product)
                     .show(parentFragmentManager, "EditProductDialog")
             },
-
             onDeleteClick = { product ->
                 DeleteDialogFragment
                     .newInstance(product)
                     .show(parentFragmentManager, "DeleteDialog")
             },
-
             fragmentManager = parentFragmentManager
         )
 
@@ -85,12 +77,6 @@ class DashboardFragment : Fragment() {
         binding.recyclerViewProducts.adapter = adapter
     }
 
-
-
-
-
-
-    // ---------------- Search ----------------
     private fun setupSearch() {
         binding.Search.addTextChangedListener(object : TextWatcher {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
@@ -101,100 +87,69 @@ class DashboardFragment : Fragment() {
         })
     }
 
+    private fun applyFilters() {
+        val today = LocalDate.now()
+        
+        val selectedType = binding.planetsSpinner.selectedItem?.toString() ?: "ทั้งหมด"
+        var filteredList = if (selectedType.contains("ทั้งหมด") || selectedType.contains("เลือก")) {
+            fullList
+        } else {
+            fullList.filter { it.typ == selectedType }
+        }
 
-    // ---------------- Status Filter ----------------
-    private fun setupStatusFilter() {
-        binding.statusGroup.setOnCheckedChangeListener { _, checkedId ->
-            when (checkedId) {
-                com.harvey.nuandsu.R.id.btnall -> filterByStatus("ทั้งหมด")
-                com.harvey.nuandsu.R.id.btnlow -> filterByStatus("ใกล้หมดอายุ")
+        val checkedId = binding.statusGroup.checkedRadioButtonId
+        if (checkedId == com.harvey.nuandsu.R.id.btnlow) {
+            filteredList = filteredList.filter { product ->
+                try {
+                    val datePart = product.date.substring(0, 10)
+                    val addedDate = LocalDate.parse(datePart)
+                    val diffDays = ChronoUnit.DAYS.between(addedDate, today)
+                    diffDays >= 7L // เปลี่ยนเป็น 7 วันตามต้องการ
+                } catch (e: Exception) {
+                    false
+                }
             }
         }
+
+        adapter.updateData(filteredList)
     }
 
-    private fun filterByStatus(status: String) {
-        val filtered = when (status) {
-            "ทั้งหมด" -> fullList
-            else -> fullList.filter { it.status == status }
+    private fun setupStatusFilter() {
+        binding.statusGroup.setOnCheckedChangeListener { _, _ ->
+            applyFilters()
         }
-        adapter.updateData(filtered)
     }
-
-
-    // ---------------- Type Filter (Spinner) ----------------
-
 
     private fun setupTypeFilter() {
         val adapterSpinner = android.widget.ArrayAdapter.createFromResource(
             requireContext(),
-            com.harvey.nuandsu.R.array.planets_array, // array ของ Spinner
-            com.harvey.nuandsu.R.layout.spinner_item  // layout ตัวอักษรสีดำ
+            com.harvey.nuandsu.R.array.planets_array,
+            com.harvey.nuandsu.R.layout.spinner_item
         )
-
-        adapterSpinner.setDropDownViewResource(
-            android.R.layout.simple_spinner_dropdown_item
-        )
-
+        adapterSpinner.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.planetsSpinner.adapter = adapterSpinner
-
-        binding.planetsSpinner.onItemSelectedListener =
-            object : AdapterView.OnItemSelectedListener {
-
-                override fun onItemSelected(
-                    parent: AdapterView<*>,
-                    view: View?,
-                    pos: Int,
-                    id: Long
-                ) {
-                    val type = parent.getItemAtPosition(pos).toString()
-                    filterByType(type)
-                }
-
-                override fun onNothingSelected(parent: AdapterView<*>) {}
-            }
 
         binding.planetsSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, pos: Int, id: Long) {
-                val type = parent.getItemAtPosition(pos).toString()
-                filterByType(type)
+                if (isFirstLoad) {
+                    isFirstLoad = false
+                    return
+                }
+                applyFilters()
             }
             override fun onNothingSelected(parent: AdapterView<*>) {}
         }
     }
 
-    private fun filterByType(type: String) {
-        val filtered = when (type) {
-            "ทั้งหมด" -> fullList
-            else -> fullList.filter { it.typ == type }
-        }
-        adapter.updateData(filtered)
-    }
-
-
-
-
-    // ---------------- Add Product Button ----------------
     private fun setupAddProduct() {
         binding.Card.setOnClickListener {
             AddProductDialogFragment().show(parentFragmentManager, "AddProductDialog")
         }
     }
 
-
-    // ---------------- Refresh Data After Delete/Edit ----------------
     fun refreshList() {
         fullList = db.getAllProducts()
-
-        binding.planetsSpinner.setSelection(0)
-
-        adapter.updateData(fullList)
-    }
-
-
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+        applyFilters()
     }
 
     override fun onResume() {
@@ -202,4 +157,8 @@ class DashboardFragment : Fragment() {
         refreshList()
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 }

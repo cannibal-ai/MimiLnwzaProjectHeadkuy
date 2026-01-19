@@ -1,10 +1,16 @@
+package com.harvey.nuandsu
+
 import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import com.harvey.nuandsu.Product
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
+import java.time.LocalDate
+import java.time.temporal.ChronoUnit
+
 
 class DBHelper(context: Context) : SQLiteOpenHelper(context, "MyDB.db", null, 2) {
 
@@ -24,12 +30,35 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "MyDB.db", null, 2)
                     "des TEXT," +
                     "date TEXT)"
         )
+
+        db.execSQL(
+            "CREATE TABLE history (" +
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                    "name TEXT," +
+                    "time TEXT," +
+                    "new TEXT," +
+                    "imageUri TEXT)"
+        )
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         db.execSQL("DROP TABLE IF EXISTS products")
+        db.execSQL("DROP TABLE IF EXISTS history")
         onCreate(db)
     }
+
+
+    fun insertHistory(history: ProductHis): Long {
+        val db = writableDatabase
+        val cv = ContentValues()
+        cv.put("name", history.name)
+        cv.put("time", history.time)
+        cv.put("new", history.new)
+        cv.put("imageUri", history.imageUri)
+        return db.insert("history", null, cv)
+    }
+
+
 
     // เพิ่มสินค้า
     fun insertProduct(product: Product): Long {
@@ -84,24 +113,43 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "MyDB.db", null, 2)
         val db = readableDatabase
 
         val cursor = db.rawQuery(
-            "SELECT * FROM products ORDER BY date DESC",
+            "SELECT * FROM products ORDER BY id DESC",
             null
         )
 
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+
         if (cursor.moveToFirst()) {
             do {
+                val dateStr = cursor.getString(cursor.getColumnIndexOrThrow("date")) ?: ""
+                
+                val status = try {
+                    if (dateStr.isNotEmpty()) {
+                        val datePart = dateStr.substring(0, 10)
+                        val createdDate = LocalDate.parse(datePart)
+                        val today = LocalDate.now()
+                        val diffDays = ChronoUnit.DAYS.between(createdDate, today)
+                        // เปลี่ยนเป็น 7 วันตามต้องการ
+                        if (diffDays >= 7L) "ใกล้หมดอายุ" else "ปกติ"
+                    } else {
+                        "ปกติ"
+                    }
+                } catch (e: Exception) {
+                    "ปกติ"
+                }
+
                 list.add(
                     Product(
                         id = cursor.getInt(cursor.getColumnIndexOrThrow("id")),
                         name = cursor.getString(cursor.getColumnIndexOrThrow("name")),
                         pc = cursor.getInt(cursor.getColumnIndexOrThrow("pc")),
                         quantity = cursor.getInt(cursor.getColumnIndexOrThrow("quantity")),
-                        status = cursor.getString(cursor.getColumnIndexOrThrow("status")),
+                        status = status,
                         imageUri = cursor.getString(cursor.getColumnIndexOrThrow("imageUri")),
                         typ = cursor.getString(cursor.getColumnIndexOrThrow("typ")),
                         des = cursor.getString(cursor.getColumnIndexOrThrow("des")),
                         totalCost = cursor.getInt(cursor.getColumnIndexOrThrow("totalCost")),
-                        date = cursor.getString(cursor.getColumnIndexOrThrow("date"))
+                        date = dateStr
                     )
                 )
             } while (cursor.moveToNext())
@@ -114,20 +162,8 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "MyDB.db", null, 2)
 
 
     fun getLowStatusCount(): Int {
-        val db = readableDatabase
-        val cursor = db.rawQuery(
-            "SELECT COUNT(*) FROM products WHERE status = ?",
-            arrayOf("น้อย")
-        )
-
-        var count = 0
-        if (cursor.moveToFirst()) {
-            count = cursor.getInt(0)
-        }
-
-        cursor.close()
-        db.close()
-        return count
+        val allProducts = getAllProducts()
+        return allProducts.count { it.status == "ใกล้หมดอายุ" }
     }
 
     //วัตถุดิบทั้งหมด
@@ -206,5 +242,52 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "MyDB.db", null, 2)
         return total
     }
 
+
+    //กูใช้ทำกราฟ
+    fun getMonthlyProductsForChart(): List<Pair<Int, Float>> {
+        val list = mutableListOf<Pair<Int, Float>>()
+        val db = readableDatabase
+
+        val sql = """
+        SELECT CAST(strftime('%d', date) AS INTEGER) AS day, totalCost
+        FROM products
+        WHERE strftime('%Y-%m', date) = strftime('%Y-%m', 'now', 'localtime')
+        ORDER BY date
+    """
+
+        val cursor = db.rawQuery(sql, null)
+
+        while (cursor.moveToNext()) {
+            val day = cursor.getInt(0)
+            val total = cursor.getFloat(1)
+            list.add(day to total)
+        }
+        cursor.close()
+        return list
+    }
+
+    fun getAllHistory(): List<ProductHis> {
+        val list = mutableListOf<ProductHis>()
+        val db = readableDatabase
+        val cursor = db.rawQuery(
+            "SELECT * FROM history ORDER BY id DESC",
+            null
+        )
+
+        if (cursor.moveToFirst()) {
+            do {
+                list.add(
+                    ProductHis(
+                        name = cursor.getString(cursor.getColumnIndexOrThrow("name")),
+                        time = cursor.getString(cursor.getColumnIndexOrThrow("time")),
+                        new = cursor.getString(cursor.getColumnIndexOrThrow("new")),
+                        imageUri = cursor.getString(cursor.getColumnIndexOrThrow("imageUri"))
+                    )
+                )
+            } while (cursor.moveToNext())
+        }
+        cursor.close()
+        return list
+    }
 
 }

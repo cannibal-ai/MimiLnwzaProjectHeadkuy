@@ -41,7 +41,7 @@
         android:layout_marginStart="18dp"
         android:layout_marginEnd="18dp"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="550dp"
         android:layout_marginTop="180dp"
         tools:ignore="MissingConstraints"
         tools:listitem="@layout/item_history" />

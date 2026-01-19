@@ -1,12 +1,15 @@
 package com.harvey.nuandsu
 
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.harvey.nuandsu.ui.history.historyFragment
+import androidx.core.graphics.toColorInt
 
 class HistoryAdapter(
 
@@ -40,11 +43,24 @@ class HistoryAdapter(
 
     override fun onBindViewHolder(holder: HistoryViewHolder, position: Int) {
         val history = filteredProducts[position]
-        holder.txtimg.setImageResource(history.image)
+
+        if (!history.imageUri.isNullOrEmpty()) {
+            Glide.with(holder.itemView.context)
+                .load(history.imageUri)
+                .placeholder(R.drawable.images)
+                .error(R.drawable.images)
+                .into(holder.txtimg)
+        } else {
+            holder.txtimg.setImageResource(R.drawable.images)
+        }
+
         holder.txtName.text = history.name
-        holder.txtTime.text = history.time.toString()
+        holder.txtTime.text = history.time
         holder.txtNew.text = history.new
+        holder.txtNew.setTextColor(if (history.new == "ล่าสุด") "#4CAF50".toColorInt() else "#fbc02d".toColorInt())
+
     }
+
 
     override fun getItemCount(): Int = filteredProducts.size
 

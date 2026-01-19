@@ -1,6 +1,6 @@
 package com.harvey.nuandsu.ui.editproduct
 
-import DBHelper
+import com.harvey.nuandsu.DBHelper
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View

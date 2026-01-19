@@ -1,6 +1,6 @@
 package com.harvey.nuandsu.ui.home
 
-import DBHelper
+import com.harvey.nuandsu.DBHelper
 import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
@@ -12,6 +12,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
@@ -32,24 +33,22 @@ class HomeFragment : Fragment() {
 
     private fun loadHistory() {
         val dbHelper = DBHelper(requireContext())
-        val products = dbHelper.getAllProducts()
-
+        val history = dbHelper.getAllHistory()
 
         historyList.clear()
-
-        for ((index, p) in products.withIndex()) {
+        history.forEachIndexed { index, item ->
             historyList.add(
                 ProductHis(
-                    image = R.drawable.images,
-                    name = p.name,
-                    time = p.date,
+                    name = item.name,
+                    time = item.time,
+                    imageUri = item.imageUri,
                     new = if (index == 0) "ล่าสุด" else null
                 )
             )
         }
         adapter.updateData(historyList)
-
     }
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -100,24 +99,72 @@ class HomeFragment : Fragment() {
     }
 
     private fun setupChart() {
+        val dbHelper = DBHelper(requireContext())
+        val rawData = dbHelper.getMonthlyProductsForChart()
+
+        // 1. รวมยอดรายวัน
+        val dailySumMap = rawData.groupBy { it.first }
+            .mapValues { entry -> entry.value.sumOf { it.second.toDouble() }.toFloat() }
+
+        // 2. หาข้อมูลของเดือนปัจจุบัน
+        val calendar = java.util.Calendar.getInstance()
+        // หาว่าเดือนนี้มีกี่วัน (30, 31 หรือ 28)
+        val lastDayOfMonth = calendar.getActualMaximum(java.util.Calendar.DAY_OF_MONTH).toFloat()
+
         val entries = ArrayList<Entry>()
-        for (day in 1..12) {
-            entries.add(Entry(day.toFloat(), (10..50).random().toFloat()))
+
+        for ((day, total) in dailySumMap) {
+            entries.add(Entry(day.toFloat(), total))
         }
 
-        val dataSet = LineDataSet(entries, "รายจ่ายวัตถุดิบในเดือนนี้")
-        dataSet.color = Color.parseColor("#6C4F35")
-        dataSet.valueTextColor = Color.BLACK
-        dataSet.lineWidth = 2f
-        dataSet.circleRadius = 4f
-        dataSet.setCircleColor(Color.RED)
-        dataSet.setDrawFilled(true)
-        dataSet.fillColor = Color.parseColor("#e8d3bd")
-        dataSet.mode = LineDataSet.Mode.CUBIC_BEZIER
+        entries.sortBy { it.x }
 
-        binding.lineChart.data = LineData(dataSet)
-        binding.lineChart.description.isEnabled = false
-        binding.lineChart.invalidate()
+        // 3. ตั้งค่า DataSet
+        val dataSet = LineDataSet(entries, "รายจ่ายรายวัน").apply {
+            mode = LineDataSet.Mode.CUBIC_BEZIER // ทำให้เส้นโค้งมน
+            color = Color.parseColor("#6C4F35")
+            setCircleColor(Color.RED)
+            circleRadius = 5f
+            lineWidth = 2.5f
+            setDrawFilled(true)
+            fillColor = Color.parseColor("#E8D3BD")
+            fillAlpha = 100
+            valueTextSize = 10f
+            setDrawValues(true)
+        }
+
+        // 4. ตั้งค่า LineChart
+        binding.lineChart.apply {
+            data = LineData(dataSet)
+            description.isEnabled = false
+
+            xAxis.apply {
+                position = XAxis.XAxisPosition.BOTTOM
+                setDrawGridLines(true)
+                granularity = 1f
+                isGranularityEnabled = true
+
+                axisMinimum = 1f            // เริ่มวันที่ 1
+                axisMaximum = lastDayOfMonth // เปลี่ยนตามเดือนอัตโนมัติ (30 หรือ 31)
+            }
+
+            axisRight.isEnabled = false
+            axisLeft.axisMinimum = 0f
+
+            // ระยะการมองเห็นเริ่มต้น 7 วัน
+            setVisibleXRangeMaximum(7f)
+
+            // ถ้าต้องการให้เลื่อนไปดูวันล่าสุดเองอัตโนมัติ
+            moveViewToX(entries.lastOrNull()?.x ?: 0f)
+
+            animateX(800)
+            invalidate()
+        }
+    }
+    override fun onResume() {
+        super.onResume()
+        setupDashboard() // เพิ่มเพื่อให้ยอดอัปเดตเมื่อกลับมาหน้านี้
+        setupChart()
     }
 
     override fun onDestroyView() {
@@ -125,4 +172,5 @@ class HomeFragment : Fragment() {
         handler.removeCallbacksAndMessages(null)
         _binding = null
     }
+
 }

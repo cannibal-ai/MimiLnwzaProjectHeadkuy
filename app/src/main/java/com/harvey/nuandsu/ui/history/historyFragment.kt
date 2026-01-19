@@ -1,6 +1,5 @@
 package com.harvey.nuandsu.ui.history
 
-import DBHelper
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -9,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.harvey.nuandsu.DBHelper
 import com.harvey.nuandsu.HistoryAdapter
 import com.harvey.nuandsu.ProductHis
 import com.harvey.nuandsu.R
@@ -24,30 +24,16 @@ class historyFragment : Fragment() {
     private val historyList = mutableListOf<ProductHis>()
 
 
+
+
     private fun loadHistory() {
         val dbHelper = DBHelper(requireContext())
-        val products = dbHelper.getAllProducts()
-
+        val history = dbHelper.getAllHistory()
 
         historyList.clear()
-
-        for ((index, p) in products.withIndex()) {
-            historyList.add(
-                ProductHis(
-                    image = R.drawable.images,
-                    name = p.name,
-                    time = p.date,
-                    new = if (index == 0) "ล่าสุด" else null
-                )
-            )
-        }
+        historyList.addAll(history)
         adapter.updateData(historyList)
-
     }
-
-
-
-
     private lateinit var adapter: HistoryAdapter
 
     override fun onCreateView(
