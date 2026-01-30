@@ -12,7 +12,7 @@ import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
 
-class DBHelper(context: Context) : SQLiteOpenHelper(context, "MyDB.db", null, 2) {
+class DBHelper(context: Context) : SQLiteOpenHelper(context, "MyDB.db", null, 3) {
 
 
 
@@ -39,12 +39,34 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "MyDB.db", null, 2)
                     "new TEXT," +
                     "imageUri TEXT)"
         )
+
+        db.execSQL(
+            "CREATE TABLE transactions (" +
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                    "amount INTEGER," +
+                    "date TEXT)"
+        )
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        db.execSQL("DROP TABLE IF EXISTS products")
-        db.execSQL("DROP TABLE IF EXISTS history")
-        onCreate(db)
+        if (oldVersion < 3) {
+            db.execSQL(
+                "CREATE TABLE transactions (" +
+                        "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                        "amount INTEGER," +
+                        "date TEXT)"
+            )
+        }
+    }
+
+    // บันทึกรายจ่ายจริง (ยอมให้ค่าติดลบได้ เพื่อใช้หักลบรายการที่คีย์ผิด)
+    fun insertTransaction(amount: Int) {
+        if (amount == 0) return
+        val db = writableDatabase
+        val cv = ContentValues()
+        cv.put("amount", amount)
+        cv.put("date", java.text.SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date()))
+        db.insert("transactions", null, cv)
     }
 
 
@@ -72,8 +94,14 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "MyDB.db", null, 2)
         cv.put("pc", product.pc)
         cv.put("des", product.des)
         cv.put("totalCost", product.totalCost)
-        cv.put("date", java.text.SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date()))
-        return db.insert("products", null, cv)
+        val dateStr = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date())
+        cv.put("date", dateStr)
+        
+        val id = db.insert("products", null, cv)
+        
+        insertTransaction(product.totalCost)
+        
+        return id
     }
 
     // ลบสินค้า
@@ -95,7 +123,7 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "MyDB.db", null, 2)
         cv.put("pc", product.pc)
         cv.put("des", product.des)
         cv.put("totalCost", product.totalCost)
-        cv.put("date", java.text.SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date()))
+        cv.put("date", product.date)
 
         return db.update(
             "products",
@@ -117,8 +145,6 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "MyDB.db", null, 2)
             null
         )
 
-        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
-
         if (cursor.moveToFirst()) {
             do {
                 val dateStr = cursor.getString(cursor.getColumnIndexOrThrow("date")) ?: ""
@@ -129,8 +155,7 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "MyDB.db", null, 2)
                         val createdDate = LocalDate.parse(datePart)
                         val today = LocalDate.now()
                         val diffDays = ChronoUnit.DAYS.between(createdDate, today)
-                        // เปลี่ยนเป็น 7 วันตามต้องการ
-                        if (diffDays >= 7L) "ใกล้หมดอายุ" else "ปกติ"
+                        if (diffDays >= 1L) "ใกล้หมดอายุ" else "ปกติ"
                     } else {
                         "ปกติ"
                     }
@@ -180,15 +205,14 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "MyDB.db", null, 2)
         }
 
         cursor.close()
-        db.close()
         return count
     }
 
-    //เดือนนี้
+    // ยอดรวมรายจ่ายทั้งหมด
     fun getTotalSpent(): Int {
         val db = readableDatabase
         val cursor = db.rawQuery(
-            "SELECT SUM(totalCost) FROM products",
+            "SELECT SUM(amount) FROM transactions",
             null
         )
 
@@ -197,7 +221,58 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "MyDB.db", null, 2)
             total = cursor.getInt(0)
         }
         cursor.close()
-        db.close()
+        return total
+    }
+
+    // ยอดรวมเดือนนี้
+    fun getTotalSpentCurrentMonth(): Int {
+        val db = readableDatabase
+        val cursor = db.rawQuery(
+            """
+            SELECT SUM(amount)
+            FROM transactions
+            WHERE strftime('%Y-%m', date) = strftime('%Y-%m', 'now', 'localtime')
+            """,
+            null
+        )
+
+        val total = if (cursor.moveToFirst() && !cursor.isNull(0)) {
+            cursor.getInt(0)
+        } else 0
+        cursor.close()
+        return total
+    }
+
+    // ยอดรวมเดือนที่แล้ว
+    fun getTotalSpentLastMonth(): Int {
+        val db = readableDatabase
+        val cursor = db.rawQuery(
+            """
+            SELECT SUM(amount)
+            FROM transactions
+            WHERE strftime('%Y-%m', date) = strftime('%Y-%m', 'now', '-1 month', 'localtime')
+            """,
+            null
+        )
+
+        val total = if (cursor.moveToFirst() && !cursor.isNull(0)) {
+            cursor.getInt(0)
+        } else 0
+        cursor.close()
+        return total
+    }
+
+    // ดึงยอดตามวันที่เจาะจง
+    fun getTotalSpentByDate(date: String): Int {
+        val db = readableDatabase
+        val cursor = db.rawQuery(
+            "SELECT SUM(amount) FROM transactions WHERE date(date) = ?",
+            arrayOf(date)
+        )
+        val total = if (cursor.moveToFirst() && !cursor.isNull(0)) {
+            cursor.getInt(0)
+        } else 0
+        cursor.close()
         return total
     }
 
@@ -206,8 +281,8 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "MyDB.db", null, 2)
         val db = readableDatabase
         val cursor = db.rawQuery(
             """
-        SELECT SUM(totalCost)
-        FROM products
+        SELECT SUM(amount)
+        FROM transactions
         WHERE date(date) = date('now', 'localtime')
         """,
             null
@@ -217,7 +292,6 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "MyDB.db", null, 2)
             cursor.getInt(0)
         } else 0
         cursor.close()
-        db.close()
         return total
     }
 
@@ -227,8 +301,8 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "MyDB.db", null, 2)
         val db = readableDatabase
         val cursor = db.rawQuery(
             """
-        SELECT SUM(totalCost)
-        FROM products
+        SELECT SUM(amount)
+        FROM transactions
         WHERE date(date) = date('now', '-1 day', 'localtime')
         """,
             null
@@ -238,7 +312,6 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "MyDB.db", null, 2)
             cursor.getInt(0)
         } else 0
         cursor.close()
-        db.close()
         return total
     }
 
@@ -249,8 +322,8 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "MyDB.db", null, 2)
         val db = readableDatabase
 
         val sql = """
-        SELECT CAST(strftime('%d', date) AS INTEGER) AS day, totalCost
-        FROM products
+        SELECT CAST(strftime('%d', date) AS INTEGER) AS day, amount
+        FROM transactions
         WHERE strftime('%Y-%m', date) = strftime('%Y-%m', 'now', 'localtime')
         ORDER BY date
     """

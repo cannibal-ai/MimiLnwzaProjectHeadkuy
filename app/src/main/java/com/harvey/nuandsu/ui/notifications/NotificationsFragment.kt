@@ -1,63 +1,88 @@
 package com.harvey.nuandsu.ui.notifications
 
+import android.app.DatePickerDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import com.harvey.nuandsu.DBHelper
-import com.harvey.nuandsu.R
 import com.harvey.nuandsu.databinding.FragmentNotificationsBinding
+import java.util.Calendar
 import java.util.Locale
 
 class NotificationsFragment : Fragment() {
 
+    private var _binding: FragmentNotificationsBinding? = null
+    private val binding get() = _binding!!
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         val monthFormat = java.text.SimpleDateFormat("MMMM yyyy", Locale("th", "TH"))
         binding.textViewDate.text = monthFormat.format(java.util.Date())
+        
+        // ตั้งค่าปุ่มเลือกวันที่
+        binding.btnSelectDate.setOnClickListener {
+            showDatePicker()
+        }
     }
 
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentNotificationsBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
+    private fun showDatePicker() {
+        val calendar = Calendar.getInstance()
+        val year = calendar.get(Calendar.YEAR)
+        val month = calendar.get(Calendar.MONTH)
+        val day = calendar.get(Calendar.DAY_OF_MONTH)
 
-    private var _binding: FragmentNotificationsBinding? = null
-  // This property is only valid between onCreateView and
-  // onDestroyView.
-  private val binding get() = _binding!!
+        val datePickerDialog = DatePickerDialog(
+            requireContext(),
+            { _, selectedYear, selectedMonth, selectedDay ->
+                // ฟอร์แมตวันที่เป็น yyyy-MM-dd เพื่อไปค้นหาใน DB
+                val dateString = String.format(Locale.US, "%04d-%02d-%02d", selectedYear, selectedMonth + 1, selectedDay)
+                
+                // ฟอร์แมตวันที่แสดงผลบนหัวข้อ (เช่น 12 ม.ค. 2025)
+                val displayDate = String.format(Locale("th", "TH"), "%d/%d/%d", selectedDay, selectedMonth + 1, selectedYear)
+                
+                updateSpentByDate(dateString, displayDate)
+            },
+            year, month, day
+        )
+        datePickerDialog.show()
+    }
 
-  override fun onCreateView(
-    inflater: LayoutInflater,
-    container: ViewGroup?,
-    savedInstanceState: Bundle?
-  ): View {
-    val notificationsViewModel =
-            ViewModelProvider(this).get(NotificationsViewModel::class.java)
+    private fun updateSpentByDate(dateQuery: String, displayDate: String) {
+        val dbHelper = DBHelper(requireContext())
+        val spentOnDate = dbHelper.getTotalSpentByDate(dateQuery)
 
-    _binding = FragmentNotificationsBinding.inflate(inflater, container, false)
-    val root: View = binding.root
-
-//      val textView: TextView = binding.searchcookie
-//      notificationsViewModel.text.observe(viewLifecycleOwner) {
-//          textView.text = it
-//      }
-
-      return root
-  }
+        binding.textViewTodayLabel.text = "$displayDate"
+        binding.textViewTodayAmount.text = "%,d".format(spentOnDate)
+    }
 
     override fun onResume() {
         super.onResume()
-        val dbHelper = DBHelper(requireContext())
-        val total = dbHelper.getTotalSpent()
-        val todayTotal = dbHelper.getTotalSpentToday()
-        val yesterdayTotal = dbHelper.getTotalSpentYesterday()
-        val diff = todayTotal - yesterdayTotal
+        refreshData()
+    }
 
-        binding.textViewMonthlyAmount.text = "%,d".format(total)
-        binding.textViewTodayAmount.text = "%,d".format(todayTotal)
+    private fun refreshData() {
+        val dbHelper = DBHelper(requireContext())
+        
+        val currentMonthTotal = dbHelper.getTotalSpentCurrentMonth()
+        val lastMonthTotal = dbHelper.getTotalSpentLastMonth()
+        val diff = currentMonthTotal - lastMonthTotal
+
+        binding.textViewMonthlyAmount.text = "%,d".format(currentMonthTotal)
+        binding.textViewTodayAmount.text = "%,d".format(dbHelper.getTotalSpentToday())
+        binding.textViewTodayLabel.text = "ราคาวัตถุดิบวันนี้"
+        
         binding.textViewDifferenceAmount.text = if(diff >= 0) "+%,d".format(diff) else "%,d".format(diff)
     }
 

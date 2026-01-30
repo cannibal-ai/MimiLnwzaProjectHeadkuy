@@ -123,7 +123,7 @@ class AddProductDialogFragment : DialogFragment() {
             val today = LocalDate.now()
             val expiry = today.plusDays(1) 
 
-            val status = if (today.isBefore(expiry)) "ปกติ" else "ใกล้หมดอายุ"
+            val status = if (today.isBefore(expiry)) "ปกติ" else "หมดอายุ"
 
             val desc = descEt.text.toString()
 
@@ -145,7 +145,7 @@ class AddProductDialogFragment : DialogFragment() {
                 ProductHis(
                     name = name,
                     time = dateTimeNow,
-                    new = null,
+                    new = "ล่าสุด",
                     imageUri = selectedImageUri?.toString()
                 )
             )

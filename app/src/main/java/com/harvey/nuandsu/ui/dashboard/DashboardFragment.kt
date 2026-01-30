@@ -104,7 +104,7 @@ class DashboardFragment : Fragment() {
                     val datePart = product.date.substring(0, 10)
                     val addedDate = LocalDate.parse(datePart)
                     val diffDays = ChronoUnit.DAYS.between(addedDate, today)
-                    diffDays >= 7L // เปลี่ยนเป็น 7 วันตามต้องการ
+                    diffDays >= 7L // ปรับกลับเป็น 1 วันตามที่ต้องการ
                 } catch (e: Exception) {
                     false
                 }

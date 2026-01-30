@@ -19,6 +19,8 @@ import com.bumptech.glide.Glide
 import com.harvey.nuandsu.Product
 import com.harvey.nuandsu.R
 import com.harvey.nuandsu.ui.dashboard.DashboardFragment
+import java.util.Date
+import java.util.Locale
 
 class EditDialogFragment : DialogFragment() {
 
@@ -117,21 +119,32 @@ class EditDialogFragment : DialogFragment() {
             val addQty = qtyEt.text.toString().toIntOrNull() ?: 0
             val newPrice = priceEt.text.toString().toIntOrNull() ?: 0
             
-            // คำนวณจำนวนรวมใหม่
             val finalQuantity = product.quantity + addQty
             val safeQuantity = if (finalQuantity < 0) 0 else finalQuantity
-            
-            // *** คำนวณราคารวมใหม่ (สำคัญมาก) ***
             val newTotalCost = newPrice * safeQuantity
+
+            // บันทึกวันที่อัปเดตเฉพาะเมื่อเพิ่มจำนวน
+            val finalDate = if (addQty > 0) {
+                java.text.SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date())
+            } else {
+                product.date
+            }
+
+            // *** LOGIC สำคัญ: บันทึกเฉพาะส่วนต่างราคาที่จ่ายเพิ่มจริงลงใน transactions ***
+            if (addQty > 0) {
+                val addedAmount = newPrice * addQty
+                db.insertTransaction(addedAmount)
+            }
 
             val updatedProduct = product.copy(
                 name = nameEt.text.toString(),
                 pc = newPrice,
                 quantity = safeQuantity,
-                totalCost = newTotalCost, // อัปเดตราคารวมที่นี่
+                totalCost = newTotalCost,
                 des = descEt.text.toString(),
                 typ = typeEt.selectedItem.toString(),
-                imageUri = selectedImageUri?.toString() ?: product.imageUri
+                imageUri = selectedImageUri?.toString() ?: product.imageUri,
+                date = finalDate,
             )
 
             db.updateProduct(updatedProduct)

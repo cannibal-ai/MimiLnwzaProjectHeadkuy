@@ -12,7 +12,8 @@
         android:id="@+id/textView_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        tools:ignore="MissingConstraints">
+        tools:ignore="MissingConstraints"
+        android:orientation="vertical">
 
         <TextView
             android:layout_width="wrap_content"
@@ -23,14 +24,26 @@
             android:textColor="#6C4F35"
             android:textSize="40sp"
             android:textStyle="bold"  />
+        <TextView
+            android:id="@+id/btn_select_date"
+            android:layout_width="150dp"
+            android:layout_height="30dp"
+            android:layout_marginStart="25dp"
+            android:layout_marginTop="10dp"
+            android:text="กดเลือกดูวันที่ 📅"
+            android:gravity="center"
+            android:background="@drawable/timer"
+            android:textSize="16sp"
+            android:textColor="@color/black" />
     </LinearLayout>
+
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cardview_monthly_stats"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="10dp"
         android:layout_marginEnd="24dp"
         app:cardBackgroundColor="@android:color/white"
         app:cardCornerRadius="16dp"
@@ -145,6 +158,7 @@
             android:padding="8dp">
 
             <TextView
+                android:id="@+id/textView_today_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="ราคาวัตถุดิบวันนี้"
@@ -156,6 +170,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
+                android:gravity="center"
                 android:layout_marginTop="4dp">
 
 
@@ -205,7 +220,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="ส่วนต่างจากวันก่อน"
+                android:text="ส่วนต่างจากเดือนที่แล้ว"
                 android:textColor="#333333"
                 android:textSize="14sp" />
 
@@ -238,22 +253,22 @@
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        >
+<!--    <LinearLayout-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent"-->
+<!--        >-->
 
-        <com.airbnb.lottie.LottieAnimationView
-            android:id="@+id/back3"
-            android:layout_width="match_parent"
-            android:layout_height="150dp"
-            android:layout_marginBottom="100dp"
-            android:layout_gravity="bottom"
-            android:alpha="1"
-            app:lottie_autoPlay="true"
-            app:lottie_loop="true"
-            app:lottie_rawRes="@raw/shiba" />
+<!--        <com.airbnb.lottie.LottieAnimationView-->
+<!--            android:id="@+id/back3"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="150dp"-->
+<!--            android:layout_gravity="center"-->
+<!--            android:alpha="1"-->
+<!--            app:lottie_autoPlay="true"-->
+<!--            app:lottie_loop="true"-->
+<!--            app:lottie_rawRes="@raw/shiba"-->
+<!--            />-->
 
-    </LinearLayout>
+<!--    </LinearLayout>-->
 
 </androidx.constraintlayout.widget.ConstraintLayout>

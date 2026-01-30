@@ -21,16 +21,24 @@
             android:layout_height="200dp"
             android:layout_marginBottom="10dp"
             app:cardCornerRadius="15dp"
+            android:backgroundTint="#F5F5F5"
             app:cardElevation="0dp">
+
+            <ImageView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:scaleType="centerCrop"
+                android:src="@drawable/outline_add_photo_alternate_24"
+                android:contentDescription="Preview Image" />
 
             <ImageView
                 android:id="@+id/imgPreview"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="#F5F5F5"
-                android:scaleType="centerCrop"
-                android:src="@drawable/outline_add_photo_alternate_24"
-                android:contentDescription="Preview Image" />
+                android:layout_gravity="center"
+                android:scaleType="centerCrop" />
+
         </androidx.cardview.widget.CardView>
 
         <EditText
@@ -55,7 +63,8 @@
             android:layout_width="match_parent"
             android:layout_height="45dp"
             android:popupTheme="@style/SpinnerPopupTheme"
-            android:spinnerMode="dropdown" />
+            android:spinnerMode="dropdown"
+            android:background="@drawable/kk"/>
 
         <LinearLayout
             android:layout_width="match_parent"

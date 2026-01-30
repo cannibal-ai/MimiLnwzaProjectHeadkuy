@@ -29,7 +29,7 @@ class ProductAdapter(
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val name: TextView = itemView.findViewById(R.id.txtName)
         val status: TextView = itemView.findViewById(R.id.status)
-        val btnEdit: LinearLayout = itemView.findViewById(R.id.btnEdit)
+        val btnEdit: ImageView = itemView.findViewById(R.id.btnEdit)
         val btnDelete: ImageView = itemView.findViewById(R.id.btnDelete)
         val img: ImageView = itemView.findViewById(R.id.imgIngredient)
 
@@ -64,9 +64,9 @@ class ProductAdapter(
 
             when {
                 diffDays >= 7L -> {
-                    // กำหนดให้เป็น 7 วันตามต้องการ
-                    holder.status.text = "ใกล้หมดอายุ"
-                    holder.status.setTextColor(Color.parseColor("#FFA726"))
+                    // ปรับเป็น 1 วันเพื่อใช้ในการทดสอบและจัดการปัญหา
+                    holder.status.text = "หมดอายุ"
+                    holder.status.setTextColor(Color.parseColor("#b0120a"))
                 }
                 else -> {
                     holder.status.text = ""

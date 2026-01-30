@@ -12,7 +12,6 @@
     android:foreground="?attr/selectableItemBackground">
 
     <LinearLayout
-        android:id="@+id/btnEdit"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="horizontal"
@@ -105,11 +104,19 @@
                 android:layout_weight="1"/>
 
             <ImageView
+                android:id="@+id/btnEdit"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:src="@drawable/outline_edit_square_24"
+                android:layout_marginEnd="10dp"/>
+
+            <ImageView
                 android:id="@+id/btnDelete"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:src="@drawable/outline_cancel_24"
-                android:layout_marginEnd="20dp"/>
+                android:layout_width="27dp"
+                android:layout_height="27dp"
+                android:src="@drawable/outline_delete_24"
+                android:layout_marginEnd="10dp"/>
+
         </LinearLayout>
 
 

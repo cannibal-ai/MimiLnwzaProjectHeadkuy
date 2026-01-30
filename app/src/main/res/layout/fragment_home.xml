@@ -118,7 +118,7 @@
                 android:layout_gravity="center_vertical"
                 android:layout_marginStart="5dp"
                 android:src="@drawable/outline_deployed_code_alert_24"
-                app:tint="#FF9800" />
+                app:tint="#b0120a" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -154,7 +154,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="ใกล้หมดอายุ"
+                    android:text="หมดอายุ"
                     android:textColor="#5c5c5c"
                     android:textSize="14sp" />
             </LinearLayout>
@@ -248,7 +248,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="แนวโน้มรายจ่ายเดือนนี้ 💰 ( บาท )"
+            android:text="แนวโน้มรายจ่ายเดือนนี้ 💸 ( บาท )"
             android:textSize="20sp"
             android:textColor="@color/black" />
 
