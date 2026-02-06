@@ -32,8 +32,8 @@ class ProductAdapter(
         val btnEdit: ImageView = itemView.findViewById(R.id.btnEdit)
         val btnDelete: ImageView = itemView.findViewById(R.id.btnDelete)
         val img: ImageView = itemView.findViewById(R.id.imgIngredient)
-
-        val txtTotal: TextView = itemView.findViewById(R.id.txttotal)
+        // เปลี่ยนมาผูกกับ txtQ สำหรับแสดงจำนวน
+        val txtQty: TextView = itemView.findViewById(R.id.txtQ)
 
     }
 
@@ -49,13 +49,13 @@ class ProductAdapter(
         val product = productList[position]
 
         holder.name.text = product.name
-        holder.txtTotal.text = product.pc.toString()
+        // แสดงจำนวนสินค้าปัจจุบัน
+        holder.txtQty.text = product.quantity.toString()
 
         Glide.with(holder.itemView.context)
             .load(product.imageUri)
             .into(holder.img)
 
-        // คำนวณสถานะจากวันที่เพิ่มสินค้า (product.date)
         try {
             val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
             val addedDate = LocalDate.parse(product.date.substring(0, 10)) 
@@ -64,7 +64,6 @@ class ProductAdapter(
 
             when {
                 diffDays >= 7L -> {
-                    // ปรับเป็น 1 วันเพื่อใช้ในการทดสอบและจัดการปัญหา
                     holder.status.text = "หมดอายุ"
                     holder.status.setTextColor(Color.parseColor("#b0120a"))
                 }
@@ -76,7 +75,6 @@ class ProductAdapter(
             holder.status.text = ""
         }
 
-        holder.itemView.setOnClickListener { onItemClick(product) }
         holder.btnEdit.setOnClickListener { onEditClick(product) }
         holder.btnDelete.setOnClickListener { onDeleteClick(product) }
     }

@@ -8,18 +8,16 @@ import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.harvey.nuandsu.HistoryAdapter
 import com.harvey.nuandsu.ProductHis
-import com.harvey.nuandsu.R
 import com.harvey.nuandsu.databinding.FragmentHomeBinding
+import java.util.ArrayList
 
 class HomeFragment : Fragment() {
 
@@ -29,23 +27,25 @@ class HomeFragment : Fragment() {
     private lateinit var adapter: HistoryAdapter
     private val historyList = mutableListOf<ProductHis>()
 
-
-
     private fun loadHistory() {
         val dbHelper = DBHelper(requireContext())
         val history = dbHelper.getAllHistory()
 
         historyList.clear()
-        history.forEachIndexed { index, item ->
+        
+        // แก้ไข: เลือกเอาแค่รายการแรกสุด (ล่าสุด) เพียงรายการเดียว
+        if (history.isNotEmpty()) {
+            val item = history[0]
             historyList.add(
                 ProductHis(
                     name = item.name,
                     time = item.time,
                     imageUri = item.imageUri,
-                    new = if (index == 0) "ล่าสุด" else null
+                    new = "ใหม่"
                 )
             )
         }
+        
         adapter.updateData(historyList)
     }
 
@@ -102,13 +102,10 @@ class HomeFragment : Fragment() {
         val dbHelper = DBHelper(requireContext())
         val rawData = dbHelper.getMonthlyProductsForChart()
 
-        // 1. รวมยอดรายวัน
         val dailySumMap = rawData.groupBy { it.first }
             .mapValues { entry -> entry.value.sumOf { it.second.toDouble() }.toFloat() }
 
-        // 2. หาข้อมูลของเดือนปัจจุบัน
         val calendar = java.util.Calendar.getInstance()
-        // หาว่าเดือนนี้มีกี่วัน (30, 31 หรือ 28)
         val lastDayOfMonth = calendar.getActualMaximum(java.util.Calendar.DAY_OF_MONTH).toFloat()
 
         val entries = ArrayList<Entry>()
@@ -119,9 +116,8 @@ class HomeFragment : Fragment() {
 
         entries.sortBy { it.x }
 
-        // 3. ตั้งค่า DataSet
         val dataSet = LineDataSet(entries, "รายจ่ายรายวัน").apply {
-            mode = LineDataSet.Mode.CUBIC_BEZIER // ทำให้เส้นโค้งมน
+            mode = LineDataSet.Mode.CUBIC_BEZIER 
             color = Color.parseColor("#6C4F35")
             setCircleColor(Color.RED)
             circleRadius = 5f
@@ -133,7 +129,6 @@ class HomeFragment : Fragment() {
             setDrawValues(true)
         }
 
-        // 4. ตั้งค่า LineChart
         binding.lineChart.apply {
             data = LineData(dataSet)
             description.isEnabled = false
@@ -144,26 +139,25 @@ class HomeFragment : Fragment() {
                 granularity = 1f
                 isGranularityEnabled = true
 
-                axisMinimum = 1f            // เริ่มวันที่ 1
-                axisMaximum = lastDayOfMonth // เปลี่ยนตามเดือนอัตโนมัติ (30 หรือ 31)
+                axisMinimum = 1f            
+                axisMaximum = lastDayOfMonth 
             }
 
             axisRight.isEnabled = false
             axisLeft.axisMinimum = 0f
 
-            // ระยะการมองเห็นเริ่มต้น 7 วัน
             setVisibleXRangeMaximum(7f)
-
-            // ถ้าต้องการให้เลื่อนไปดูวันล่าสุดเองอัตโนมัติ
             moveViewToX(entries.lastOrNull()?.x ?: 0f)
 
             animateX(800)
             invalidate()
         }
     }
+    
     override fun onResume() {
         super.onResume()
-        setupDashboard() // เพิ่มเพื่อให้ยอดอัปเดตเมื่อกลับมาหน้านี้
+        setupDashboard()
+        loadHistory()
         setupChart()
     }
 

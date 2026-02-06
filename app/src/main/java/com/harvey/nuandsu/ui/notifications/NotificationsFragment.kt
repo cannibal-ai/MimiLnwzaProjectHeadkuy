@@ -22,7 +22,6 @@ class NotificationsFragment : Fragment() {
         val monthFormat = java.text.SimpleDateFormat("MMMM yyyy", Locale("th", "TH"))
         binding.textViewDate.text = monthFormat.format(java.util.Date())
         
-        // ตั้งค่าปุ่มเลือกวันที่
         binding.btnSelectDate.setOnClickListener {
             showDatePicker()
         }
@@ -43,15 +42,13 @@ class NotificationsFragment : Fragment() {
         val month = calendar.get(Calendar.MONTH)
         val day = calendar.get(Calendar.DAY_OF_MONTH)
 
+        // เพิ่ม android.R.style.Theme_DeviceDefault_Dialog_Alert เพื่อบังคับใช้ธีมมืดในปฏิทิน
         val datePickerDialog = DatePickerDialog(
             requireContext(),
+            android.R.style.Theme_DeviceDefault_Dialog_Alert, 
             { _, selectedYear, selectedMonth, selectedDay ->
-                // ฟอร์แมตวันที่เป็น yyyy-MM-dd เพื่อไปค้นหาใน DB
                 val dateString = String.format(Locale.US, "%04d-%02d-%02d", selectedYear, selectedMonth + 1, selectedDay)
-                
-                // ฟอร์แมตวันที่แสดงผลบนหัวข้อ (เช่น 12 ม.ค. 2025)
                 val displayDate = String.format(Locale("th", "TH"), "%d/%d/%d", selectedDay, selectedMonth + 1, selectedYear)
-                
                 updateSpentByDate(dateString, displayDate)
             },
             year, month, day
@@ -62,7 +59,7 @@ class NotificationsFragment : Fragment() {
     private fun updateSpentByDate(dateQuery: String, displayDate: String) {
         val dbHelper = DBHelper(requireContext())
         val spentOnDate = dbHelper.getTotalSpentByDate(dateQuery)
-
+        
         binding.textViewTodayLabel.text = "$displayDate"
         binding.textViewTodayAmount.text = "%,d".format(spentOnDate)
     }

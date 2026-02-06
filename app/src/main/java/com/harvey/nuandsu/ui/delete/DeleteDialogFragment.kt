@@ -45,24 +45,32 @@ class DeleteDialogFragment : DialogFragment() {
         txtMessage.text = "ต้องการลบ \"${product.name}\" ใช่ไหม?"
 
         btnConfirm.setOnClickListener {
+            // *** LOGIC สำคัญ: หักลบยอดเงินในหน้าสรุปคืนก่อนทำการลบสินค้า ***
+            // นำราคาสวม (totalCost) มาทำให้เป็นค่าติดลบเพื่อหักออก
+            if (product.totalCost > 0) {
+                db.insertTransaction(-product.totalCost)
+            }
+
+            // ลบสินค้าออกจากฐานข้อมูล
             db.deleteProduct(product.id)
 
-
+            // รีเฟรชหน้า Dashboard
             (parentFragment as? DashboardFragment)?.let { dash ->
                 dash.refreshList()
             }
 
+            // ส่งสัญญาณไปยัง Fragment อื่นๆ ว่าข้อมูลมีการเปลี่ยนแปลง
             parentFragmentManager.setFragmentResult(
                 "product_changed",
                 Bundle()
             )
 
             dismiss()
+            // ปิดหน้า Edit Dialog ถ้าเปิดค้างไว้อยู่
             parentFragmentManager.findFragmentByTag("EditProductDialog")?.let {
                 (it as DialogFragment).dismiss()
             }
         }
-
 
         return view
     }

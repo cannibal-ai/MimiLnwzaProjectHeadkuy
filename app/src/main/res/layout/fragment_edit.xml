@@ -75,7 +75,7 @@
                 android:layout_height="50dp"
                 android:popupTheme="@style/SpinnerPopupTheme"
                 android:spinnerMode="dropdown"
-                android:background="@drawable/kk"/>
+              />
         </LinearLayout>
 
         <LinearLayout

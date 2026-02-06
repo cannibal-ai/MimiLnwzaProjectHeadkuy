@@ -8,11 +8,9 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.harvey.nuandsu.ui.history.historyFragment
 import androidx.core.graphics.toColorInt
 
 class HistoryAdapter(
-
     private var historyList: List<ProductHis>,
     private val onItemClick: (ProductHis) -> Unit
 ) : RecyclerView.Adapter<HistoryAdapter.HistoryViewHolder>() {
@@ -21,7 +19,6 @@ class HistoryAdapter(
     private var filteredProducts: List<ProductHis> = historyList.toList()
 
     inner class HistoryViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-
         val txtimg: ImageView = itemView.findViewById(R.id.txtimg)
         val txtName: TextView = itemView.findViewById(R.id.txtName)
         val txtTime: TextView = itemView.findViewById(R.id.txtTime)
@@ -29,8 +26,11 @@ class HistoryAdapter(
 
         init {
             itemView.setOnClickListener {
-                val history = filteredProducts[adapterPosition]
-                onItemClick(history)
+                val position = adapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    val history = filteredProducts[position]
+                    onItemClick(history)
+                }
             }
         }
     }
@@ -56,11 +56,16 @@ class HistoryAdapter(
 
         holder.txtName.text = history.name
         holder.txtTime.text = history.time
-        holder.txtNew.text = history.new
-        holder.txtNew.setTextColor(if (history.new == "ล่าสุด") "#4CAF50".toColorInt() else "#fbc02d".toColorInt())
-
+        
+        // แก้ไข: แสดงคำว่า "ล่าสุด" เฉพาะรายการแรกสุด (position == 0) เท่านั้น
+        if (position == 0) {
+            holder.txtNew.visibility = View.VISIBLE
+            holder.txtNew.text = "ล่าสุด"
+            holder.txtNew.setTextColor("#4CAF50".toColorInt())
+        } else {
+            holder.txtNew.visibility = View.GONE
+        }
     }
-
 
     override fun getItemCount(): Int = filteredProducts.size
 
@@ -80,6 +85,4 @@ class HistoryAdapter(
         filteredProducts = newList
         notifyDataSetChanged()
     }
-
 }
-

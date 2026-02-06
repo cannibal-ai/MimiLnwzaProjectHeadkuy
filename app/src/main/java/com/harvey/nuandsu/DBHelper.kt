@@ -155,7 +155,7 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "MyDB.db", null, 3)
                         val createdDate = LocalDate.parse(datePart)
                         val today = LocalDate.now()
                         val diffDays = ChronoUnit.DAYS.between(createdDate, today)
-                        if (diffDays >= 1L) "ใกล้หมดอายุ" else "ปกติ"
+                        if (diffDays >= 7L) "หมดอายุ" else "ปกติ"
                     } else {
                         "ปกติ"
                     }

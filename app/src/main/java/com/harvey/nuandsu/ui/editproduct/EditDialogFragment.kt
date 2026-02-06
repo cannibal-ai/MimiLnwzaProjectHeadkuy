@@ -12,6 +12,7 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Spinner
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.DialogFragment
@@ -79,10 +80,7 @@ class EditDialogFragment : DialogFragment() {
         descEt.setText(product.des)
 
         if (!product.imageUri.isNullOrEmpty()) {
-            Glide.with(this)
-                .load(product.imageUri)
-                .centerCrop()
-                .into(previewImage)
+            Glide.with(this).load(product.imageUri).centerCrop().into(previewImage)
         }
 
         val typeArray = resources.getStringArray(R.array.product_types_filter)
@@ -96,45 +94,42 @@ class EditDialogFragment : DialogFragment() {
             val currentQty = qtyEt.text.toString().toIntOrNull() ?: 0
             qtyEt.setText((currentQty + 1).toString())
         }
+        
         btnMinus.setOnClickListener {
-            val currentQty = qtyEt.text.toString().toIntOrNull() ?: 0
-            qtyEt.setText((currentQty - 1).toString())
+            val currentInInput = qtyEt.text.toString().toIntOrNull() ?: 0
+            
+            // เช็คว่าถ้าจำนวนในสต็อกเป็น 0 และไม่ได้มีการพิมพ์เลขบวกไว้ ให้เตือน
+            if (product.quantity + currentInInput <= 0) {
+                Toast.makeText(requireContext(), "กรุณาเพิ่มวัตถุดิบ", Toast.LENGTH_SHORT).show()
+            } else {
+                qtyEt.setText((currentInInput - 1).toString())
+            }
         }
 
         imagePickerLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
             if (uri != null) {
                 selectedImageUri = uri
-                Glide.with(this)
-                    .load(uri)
-                    .centerCrop()
-                    .into(previewImage)
+                Glide.with(this).load(uri).centerCrop().into(previewImage)
             }
         }
 
-        previewImage.setOnClickListener {
-            imagePickerLauncher.launch("image/*")
-        }
+        previewImage.setOnClickListener { imagePickerLauncher.launch("image/*") }
 
         updateBtn.setOnClickListener {
             val addQty = qtyEt.text.toString().toIntOrNull() ?: 0
             val newPrice = priceEt.text.toString().toIntOrNull() ?: 0
-            
             val finalQuantity = product.quantity + addQty
             val safeQuantity = if (finalQuantity < 0) 0 else finalQuantity
             val newTotalCost = newPrice * safeQuantity
 
-            // บันทึกวันที่อัปเดตเฉพาะเมื่อเพิ่มจำนวน
             val finalDate = if (addQty > 0) {
                 java.text.SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date())
             } else {
                 product.date
             }
 
-            // *** LOGIC สำคัญ: บันทึกเฉพาะส่วนต่างราคาที่จ่ายเพิ่มจริงลงใน transactions ***
-            if (addQty > 0) {
-                val addedAmount = newPrice * addQty
-                db.insertTransaction(addedAmount)
-            }
+            if (addQty > 0) db.insertTransaction(newPrice * addQty)
+            else if (addQty < 0) db.insertTransaction(newPrice * addQty)
 
             val updatedProduct = product.copy(
                 name = nameEt.text.toString(),
@@ -144,11 +139,10 @@ class EditDialogFragment : DialogFragment() {
                 des = descEt.text.toString(),
                 typ = typeEt.selectedItem.toString(),
                 imageUri = selectedImageUri?.toString() ?: product.imageUri,
-                date = finalDate,
+                date = finalDate
             )
 
             db.updateProduct(updatedProduct)
-
             (parentFragment as? DashboardFragment)?.refreshList()
             parentFragmentManager.setFragmentResult("product_changed", Bundle())
             dismiss()
